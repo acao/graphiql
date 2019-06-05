@@ -5,7 +5,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 import { expect } from 'chai';
-import React from 'react';
+import * as React from 'react';
 import { mount } from 'enzyme';
 
 import { GraphiQL } from '../GraphiQL';
@@ -13,10 +13,10 @@ import { GraphiQL } from '../GraphiQL';
 const mockStorage = (function() {
   let store = {};
   return {
-    getItem(key) {
+    getItem(key: string) {
       return store.hasOwnProperty(key) ? store[key] : null;
     },
-    setItem(key, value) {
+    setItem(key: string, value: any) {
       store[key] = value.toString();
     },
     clear() {

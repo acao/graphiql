@@ -6,14 +6,29 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import * as CodeMirror from 'codemirror';
 import { GraphQLSchema } from 'graphql';
 import MD from 'markdown-it';
 import { normalizeWhitespace } from '../utility/normalizeWhitespace';
 import onHasCompletion from '../utility/onHasCompletion';
 
 const md = new MD();
+
 const AUTO_COMPLETE_AFTER_KEY = /^[a-zA-Z0-9_@(]$/;
+
+type QueryEditorProps = {
+  schema?: GraphQLSchema;
+  value?: string;
+  onEdit?: (...args: any[]) => any;
+  readOnly?: boolean;
+  onHintInformationRender?: (...args: any[]) => any;
+  onClickReference?: (...args: any[]) => any;
+  onCopyQuery?: () => any;
+  onPrettifyQuery?: () => any;
+  onMergeQuery?: () => any;
+  onRunQuery?: () => any;
+  editorTheme?: string;
+};
 
 /**
  * QueryEditor
@@ -28,24 +43,15 @@ const AUTO_COMPLETE_AFTER_KEY = /^[a-zA-Z0-9_@(]$/;
  *   - readOnly: Turns the editor to read-only mode.
  *
  */
-export class QueryEditor extends React.Component {
-  static propTypes = {
-    schema: PropTypes.instanceOf(GraphQLSchema),
-    value: PropTypes.string,
-    onEdit: PropTypes.func,
-    readOnly: PropTypes.bool,
-    onHintInformationRender: PropTypes.func,
-    onClickReference: PropTypes.func,
-    onCopyQuery: PropTypes.func,
-    onPrettifyQuery: PropTypes.func,
-    onMergeQuery: PropTypes.func,
-    onRunQuery: PropTypes.func,
-    editorTheme: PropTypes.string,
-  };
+export class QueryEditor extends React.Component<QueryEditorProps, {}> {
+
+  editor: CodeMirror.Editor;
+  _node: HTMLElement;
+  ignoreChangeEvent: boolean;
+  cachedValue?: string;
 
   constructor(props) {
-    super();
-
+    super(props);
     // Keep a cached version of the value, this cache will be updated when the
     // editor is updated, which can later be used to protect the editor from
     // unnecessary updates during the update lifecycle.
@@ -55,7 +61,7 @@ export class QueryEditor extends React.Component {
   componentDidMount() {
     // Lazily require to ensure requiring GraphiQL outside of a Browser context
     // does not produce an error.
-    const CodeMirror = require('codemirror');
+
     require('codemirror/addon/hint/show-hint');
     require('codemirror/addon/comment/comment');
     require('codemirror/addon/edit/matchbrackets');
@@ -117,7 +123,6 @@ export class QueryEditor extends React.Component {
           this.editor.showHint({ completeSingle: true, container: this._node }),
         'Shift-Alt-Space': () =>
           this.editor.showHint({ completeSingle: true, container: this._node }),
-
         'Cmd-Enter': () => {
           if (this.props.onRunQuery) {
             this.props.onRunQuery();
@@ -128,31 +133,26 @@ export class QueryEditor extends React.Component {
             this.props.onRunQuery();
           }
         },
-
         'Shift-Ctrl-C': () => {
           if (this.props.onCopyQuery) {
             this.props.onCopyQuery();
           }
         },
-
         'Shift-Ctrl-P': () => {
           if (this.props.onPrettifyQuery) {
             this.props.onPrettifyQuery();
           }
         },
-
         'Shift-Ctrl-M': () => {
           if (this.props.onMergeQuery) {
             this.props.onMergeQuery();
           }
         },
-
         // Persistent search box in Query Editor
         'Cmd-F': 'findPersistent',
         'Ctrl-F': 'findPersistent',
         'Cmd-G': 'findPersistent',
         'Ctrl-G': 'findPersistent',
-
         // Editor improvements
         'Ctrl-Left': 'goSubwordLeft',
         'Ctrl-Right': 'goSubwordRight',
@@ -160,16 +160,13 @@ export class QueryEditor extends React.Component {
         'Alt-Right': 'goGroupRight',
       },
     });
-
     this.editor.on('change', this._onEdit);
     this.editor.on('keyup', this._onKeyUp);
     this.editor.on('hasCompletion', this._onHasCompletion);
     this.editor.on('beforeChange', this._onBeforeChange);
   }
-
   componentDidUpdate(prevProps) {
     const CodeMirror = require('codemirror');
-
     // Ensure the changes caused by this update are not interpretted as
     // user-input changes which could otherwise result in an infinite
     // event loop.
@@ -190,14 +187,12 @@ export class QueryEditor extends React.Component {
     }
     this.ignoreChangeEvent = false;
   }
-
   componentWillUnmount() {
     this.editor.off('change', this._onEdit);
     this.editor.off('keyup', this._onKeyUp);
     this.editor.off('hasCompletion', this._onHasCompletion);
     this.editor = null;
   }
-
   render() {
     return (
       <div
@@ -208,7 +203,6 @@ export class QueryEditor extends React.Component {
       />
     );
   }
-
   /**
    * Public API for retrieving the CodeMirror instance from this
    * React component.
@@ -216,20 +210,17 @@ export class QueryEditor extends React.Component {
   getCodeMirror() {
     return this.editor;
   }
-
   /**
    * Public API for retrieving the DOM client height for this component.
    */
   getClientHeight() {
     return this._node && this._node.clientHeight;
   }
-
-  _onKeyUp = (cm, event) => {
+  _onKeyUp = (_cm, event: React.KeyboardEvent) => {
     if (AUTO_COMPLETE_AFTER_KEY.test(event.key)) {
       this.editor.execCommand('autocomplete');
     }
   };
-
   _onEdit = () => {
     if (!this.ignoreChangeEvent) {
       this.cachedValue = this.editor.getValue();
@@ -238,7 +229,6 @@ export class QueryEditor extends React.Component {
       }
     }
   };
-
   /**
    * Render a custom UI for CodeMirror's hint which includes additional info
    * about the type and description for the selected context.
@@ -246,8 +236,7 @@ export class QueryEditor extends React.Component {
   _onHasCompletion = (cm, data) => {
     onHasCompletion(cm, data, this.props.onHintInformationRender);
   };
-
-  _onBeforeChange(instance, change) {
+  _onBeforeChange(_instance, change) {
     // The update function is only present on non-redo, non-undo events.
     if (change.origin === 'paste') {
       const text = change.text.map(normalizeWhitespace);

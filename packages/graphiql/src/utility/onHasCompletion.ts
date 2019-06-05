@@ -4,8 +4,9 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
+import * as CodeMirror from 'codemirror'
 
-import { GraphQLNonNull, GraphQLList } from 'graphql';
+import { GraphQLNonNull, GraphQLList, GraphQLType } from 'graphql';
 import MD from 'markdown-it';
 
 const md = new MD();
@@ -14,18 +15,18 @@ const md = new MD();
  * Render a custom UI for CodeMirror's hint which includes additional info
  * about the type and description for the selected context.
  */
-export default function onHasCompletion(cm, data, onHintInformationRender) {
+export default function onHasCompletion(_cm, data, onHintInformationRender: Function) {
   const CodeMirror = require('codemirror');
 
-  let information;
-  let deprecation;
+  let information: HTMLDivElement;
+  let deprecation: HTMLDivElement;
 
   // When a hint result is selected, we augment the UI with information.
   CodeMirror.on(data, 'select', (ctx, el) => {
     // Only the first time (usually when the hint UI is first displayed)
     // do we create the information nodes.
     if (!information) {
-      const hintsUl = el.parentNode;
+      const hintsUl: Node = el.parentNode;
 
       // This "information" node will contain the additional info about the
       // highlighted typeahead option.
@@ -40,14 +41,14 @@ export default function onHasCompletion(cm, data, onHintInformationRender) {
 
       // When CodeMirror attempts to remove the hint UI, we detect that it was
       // removed and in turn remove the information nodes.
-      let onRemoveFn;
+      let onRemoveFn: EventHandlerNonNull | null;
       hintsUl.addEventListener(
         'DOMNodeRemoved',
         (onRemoveFn = event => {
           if (event.target === hintsUl) {
             hintsUl.removeEventListener('DOMNodeRemoved', onRemoveFn);
-            information = null;
-            deprecation = null;
+            information.remove();
+            deprecation.remove();
             onRemoveFn = null;
           }
         }),
@@ -87,7 +88,7 @@ export default function onHasCompletion(cm, data, onHintInformationRender) {
   });
 }
 
-function renderType(type) {
+function renderType(type: GraphQLType): string {
   if (type instanceof GraphQLNonNull) {
     return `${renderType(type.ofType)}!`;
   }

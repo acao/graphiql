@@ -4,11 +4,21 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
 import React from 'react';
-import PropTypes from 'prop-types';
-
+import * as CodeMirror from 'codemirror';
 import onHasCompletion from '../utility/onHasCompletion';
+
+type VariableEditorProps = {
+  variableToType?: object;
+  value?: string;
+  onEdit?: (...args: any[]) => any;
+  readOnly?: boolean;
+  onHintInformationRender?: (...args: any[]) => any;
+  onPrettifyQuery?: (...args: any[]) => any;
+  onMergeQuery?: (...args: any[]) => any;
+  onRunQuery?: (...args: any[]) => any;
+  editorTheme?: string;
+};
 
 /**
  * VariableEditor
@@ -23,22 +33,15 @@ import onHasCompletion from '../utility/onHasCompletion';
  *   - readOnly: Turns the editor to read-only mode.
  *
  */
-export class VariableEditor extends React.Component {
-  static propTypes = {
-    variableToType: PropTypes.object,
-    value: PropTypes.string,
-    onEdit: PropTypes.func,
-    readOnly: PropTypes.bool,
-    onHintInformationRender: PropTypes.func,
-    onPrettifyQuery: PropTypes.func,
-    onMergeQuery: PropTypes.func,
-    onRunQuery: PropTypes.func,
-    editorTheme: PropTypes.string,
-  };
+export class VariableEditor extends React.Component<VariableEditorProps, {}> {
 
-  constructor(props) {
-    super();
+  editor: CodeMirror.Editor;
+  _node: HTMLDivElement;
+  ignoreChangeEvent: boolean;
+  cachedValue?: string;
 
+  constructor(props: VariableEditorProps) {
+    super(props);
     // Keep a cached version of the value, this cache will be updated when the
     // editor is updated, which can later be used to protect the editor from
     // unnecessary updates during the update lifecycle.
@@ -88,26 +91,25 @@ export class VariableEditor extends React.Component {
       gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
       extraKeys: {
         'Cmd-Space': () =>
-          this.editor.showHint({
+          CodeMirror.showHint({
             completeSingle: false,
             container: this._node,
           }),
         'Ctrl-Space': () =>
-          this.editor.showHint({
+          CodeMirror.showHint({
             completeSingle: false,
             container: this._node,
           }),
         'Alt-Space': () =>
-          this.editor.showHint({
+          CodeMirror.showHint({
             completeSingle: false,
             container: this._node,
           }),
         'Shift-Space': () =>
-          this.editor.showHint({
+          CodeMirror.showHint({
             completeSingle: false,
             container: this._node,
           }),
-
         'Cmd-Enter': () => {
           if (this.props.onRunQuery) {
             this.props.onRunQuery();
@@ -118,25 +120,21 @@ export class VariableEditor extends React.Component {
             this.props.onRunQuery();
           }
         },
-
         'Shift-Ctrl-P': () => {
           if (this.props.onPrettifyQuery) {
             this.props.onPrettifyQuery();
           }
         },
-
         'Shift-Ctrl-M': () => {
           if (this.props.onMergeQuery) {
             this.props.onMergeQuery();
           }
         },
-
         // Persistent search box in Query Editor
         'Cmd-F': 'findPersistent',
         'Ctrl-F': 'findPersistent',
         'Cmd-G': 'findPersistent',
         'Ctrl-G': 'findPersistent',
-
         // Editor improvements
         'Ctrl-Left': 'goSubwordLeft',
         'Ctrl-Right': 'goSubwordRight',
@@ -144,15 +142,13 @@ export class VariableEditor extends React.Component {
         'Alt-Right': 'goGroupRight',
       },
     });
-
     this.editor.on('change', this._onEdit);
     this.editor.on('keyup', this._onKeyUp);
     this.editor.on('hasCompletion', this._onHasCompletion);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: VariableEditorProps) {
     const CodeMirror = require('codemirror');
-
     // Ensure the changes caused by this update are not interpretted as
     // user-input changes which could otherwise result in an infinite
     // event loop.
@@ -206,7 +202,7 @@ export class VariableEditor extends React.Component {
     return this._node && this._node.clientHeight;
   }
 
-  _onKeyUp = (cm, event) => {
+  _onKeyUp = (_cm, event: KeyboardEvent) => {
     const code = event.keyCode;
     if (
       (code >= 65 && code <= 90) || // letters
@@ -216,7 +212,7 @@ export class VariableEditor extends React.Component {
     ) {
       this.editor.execCommand('autocomplete');
     }
-  };
+  }
 
   _onEdit = () => {
     if (!this.ignoreChangeEvent) {
@@ -225,9 +221,10 @@ export class VariableEditor extends React.Component {
         this.props.onEdit(this.cachedValue);
       }
     }
-  };
+  }
 
-  _onHasCompletion = (cm, data) => {
+  _onHasCompletion = (_cm, data) => {
     onHasCompletion(cm, data, this.props.onHintInformationRender);
-  };
+  }
+
 }

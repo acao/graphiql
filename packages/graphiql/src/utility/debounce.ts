@@ -9,11 +9,11 @@
  * Provided a duration and a function, returns a new function which is called
  * `duration` milliseconds after the last call.
  */
-export default function debounce(duration, fn) {
-  let timeout;
+export default function debounce(duration: number, fn: Function) {
+  let timeout: NodeJS.Timeout;
   return function() {
     clearTimeout(timeout);
-    timeout = setTimeout(() => {
+    timeout = setTimeout(function() {
       timeout = null;
       fn.apply(this, arguments);
     }, duration);

@@ -4,11 +4,12 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import { GraphQLSchema, isType } from 'graphql';
-
+import * as React from 'react';
+import {
+  GraphQLSchema,
+  isType,
+  GraphQLType
+} from 'graphql';
 import FieldDoc from './DocExplorer/FieldDoc';
 import SchemaDoc from './DocExplorer/SchemaDoc';
 import SearchBox from './DocExplorer/SearchBox';
@@ -18,6 +19,21 @@ import TypeDoc from './DocExplorer/TypeDoc';
 const initialNav = {
   name: 'Schema',
   title: 'Documentation Explorer',
+};
+
+type NavItem = {
+  name: string;
+  title?: string;
+  search?: string;
+  def?: GraphQLType;
+};
+
+type DocExplorerProps = {
+  schema?: GraphQLSchema;
+};
+
+type DocExplorerState = {
+  navStack: NavItem[];
 };
 
 /**
@@ -36,29 +52,24 @@ const initialNav = {
  *     top bar. Typically this will be a "close" button for temporary explorer.
  *
  */
-export class DocExplorer extends React.Component {
-  static propTypes = {
-    schema: PropTypes.instanceOf(GraphQLSchema),
-  };
-
-  constructor() {
-    super();
-
+export class DocExplorer extends React.Component<
+  DocExplorerProps,
+  DocExplorerState
+> {
+  constructor(props) {
+    super(props);
     this.state = { navStack: [initialNav] };
   }
-
   shouldComponentUpdate(nextProps, nextState) {
     return (
       this.props.schema !== nextProps.schema ||
       this.state.navStack !== nextState.navStack
     );
   }
-
   render() {
     const schema = this.props.schema;
     const navStack = this.state.navStack;
     const navItem = navStack[navStack.length - 1];
-
     let content;
     if (schema === undefined) {
       // Schema is undefined when it is being loaded via introspection.
@@ -102,10 +113,8 @@ export class DocExplorer extends React.Component {
         />
       );
     }
-
     const shouldSearchBoxAppear =
       navStack.length === 1 || (isType(navItem.def) && navItem.def.getFields);
-
     let prevName;
     if (navStack.length > 1) {
       prevName = navStack[navStack.length - 2].name;
@@ -141,7 +150,7 @@ export class DocExplorer extends React.Component {
   }
 
   // Public API
-  showDoc(typeOrField) {
+  showDoc(typeOrField: GraphQLType) {
     const navStack = this.state.navStack;
     const topNav = navStack[navStack.length - 1];
     if (topNav.def !== typeOrField) {
@@ -157,7 +166,7 @@ export class DocExplorer extends React.Component {
   }
 
   // Public API
-  showDocForReference(reference) {
+  showDocForReference(reference: GraphQLType) {
     if (reference.kind === 'Type') {
       this.showDoc(reference.type);
     } else if (reference.kind === 'Field') {
@@ -168,30 +177,25 @@ export class DocExplorer extends React.Component {
       this.showDoc(reference.type);
     }
   }
-
   // Public API
-  showSearch(search) {
+  showSearch(search: string) {
     const navStack = this.state.navStack.slice();
     const topNav = navStack[navStack.length - 1];
     navStack[navStack.length - 1] = { ...topNav, search };
     this.setState({ navStack });
   }
-
   reset() {
     this.setState({ navStack: [initialNav] });
   }
-
   handleNavBackClick = () => {
     if (this.state.navStack.length > 1) {
       this.setState({ navStack: this.state.navStack.slice(0, -1) });
     }
   };
-
   handleClickTypeOrField = typeOrField => {
     this.showDoc(typeOrField);
   };
-
-  handleSearch = value => {
+  handleSearch = (value: string) => {
     this.showSearch(value);
   };
 }

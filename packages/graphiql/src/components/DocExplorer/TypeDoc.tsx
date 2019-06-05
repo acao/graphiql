@@ -13,6 +13,9 @@ import {
   GraphQLInterfaceType,
   GraphQLUnionType,
   GraphQLEnumType,
+  GraphQLType,
+  GraphQLField,
+  GraphQLEnumValue,
 } from 'graphql';
 
 import Argument from './Argument';
@@ -20,14 +23,24 @@ import MarkdownContent from './MarkdownContent';
 import TypeLink from './TypeLink';
 import DefaultValue from './DefaultValue';
 
-export default class TypeDoc extends React.Component {
-  static propTypes = {
-    schema: PropTypes.instanceOf(GraphQLSchema),
-    type: PropTypes.object,
-    onClickType: PropTypes.func,
-    onClickField: PropTypes.func,
-  };
+type TypeDocProps = {
+  schema: GraphQLSchema;
+  type: GraphQLType;
+  onClickType: (type: GraphQLType, e: React.MouseEvent<any>) => any;
+  onClickField: (
+    field: GraphQLField<any, any>,
+    e: React.MouseEvent<any>,
+  ) => any;
+};
 
+type TypeDocState = {
+  showDeprecated: boolean;
+};
+
+export default class TypeDoc extends React.Component<
+  TypeDocProps,
+  TypeDocState
+> {
   constructor(props) {
     super(props);
     this.state = { showDeprecated: false };
@@ -131,7 +144,9 @@ export default class TypeDoc extends React.Component {
           <div className="doc-category-title">{'values'}</div>
           {values
             .filter(value => !value.isDeprecated)
-            .map(value => <EnumValue key={value.name} value={value} />)}
+            .map(value => (
+              <EnumValue key={value.name} value={value} />
+            ))}
         </div>
       );
 
@@ -173,7 +188,17 @@ export default class TypeDoc extends React.Component {
   handleShowDeprecated = () => this.setState({ showDeprecated: true });
 }
 
-function Field({ type, field, onClickType, onClickField }) {
+type FieldProps = {
+  type: GraphQLType,
+  field: GraphQLField<any, any>,
+  onClickType: (type: GraphQLType, e: React.MouseEvent<any>) => any;
+  onClickField: (
+    field: GraphQLField<any, any>,
+    e: React.MouseEvent<any>,
+  ) => any;
+};
+
+function Field({ type, field, onClickType, onClickField }: FieldProps) {
   return (
     <div className="doc-category-item">
       <a
@@ -210,14 +235,11 @@ function Field({ type, field, onClickType, onClickField }) {
   );
 }
 
-Field.propTypes = {
-  type: PropTypes.object,
-  field: PropTypes.object,
-  onClickType: PropTypes.func,
-  onClickField: PropTypes.func,
+type EnumValueProps = {
+  value: GraphQLEnumValue;
 };
 
-function EnumValue({ value }) {
+function EnumValue({ value }: EnumValueProps) {
   return (
     <div className="doc-category-item">
       <div className="enum-value">{value.name}</div>
@@ -234,7 +256,3 @@ function EnumValue({ value }) {
     </div>
   );
 }
-
-EnumValue.propTypes = {
-  value: PropTypes.object,
-};

@@ -1,10 +1,13 @@
 import { parse } from 'graphql';
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import QueryStore from '../utility/QueryStore';
 import HistoryQuery from './HistoryQuery';
 
-const shouldSaveQuery = (nextProps, current, lastQuerySaved) => {
+const shouldSaveQuery = (
+  nextProps: QueryHistoryProps,
+  current: QueryHistoryProps,
+  lastQuerySaved,
+) => {
   if (nextProps.queryID === current.queryID) {
     return false;
   }
@@ -34,16 +37,25 @@ const shouldSaveQuery = (nextProps, current, lastQuerySaved) => {
 
 const MAX_HISTORY_LENGTH = 20;
 
-export class QueryHistory extends React.Component {
-  static propTypes = {
-    query: PropTypes.string,
-    variables: PropTypes.string,
-    operationName: PropTypes.string,
-    queryID: PropTypes.number,
-    onSelectQuery: PropTypes.func,
-    storage: PropTypes.object,
-  };
+type QueryHistoryProps = {
+  query?: string;
+  variables?: string;
+  operationName?: string;
+  queryID?: number;
+  onSelectQuery?: (...args: any[]) => any;
+  storage?: object;
+};
 
+type QueryHistoryState = {
+  queries: any;
+};
+
+export class QueryHistory extends React.Component<
+  QueryHistoryProps,
+  QueryHistoryState
+> {
+  historyStore: QueryStore
+  favoriteStore: QueryStore
   constructor(props) {
     super(props);
     this.historyStore = new QueryStore('queries', props.storage);
@@ -53,7 +65,6 @@ export class QueryHistory extends React.Component {
     const queries = historyQueries.concat(favoriteQueries);
     this.state = { queries };
   }
-
   componentWillReceiveProps(nextProps) {
     if (
       shouldSaveQuery(nextProps, this.props, this.historyStore.fetchRecent())
@@ -75,7 +86,6 @@ export class QueryHistory extends React.Component {
       });
     }
   }
-
   render() {
     const queries = this.state.queries.slice().reverse();
     const queryNodes = queries.map((query, i) => {
@@ -99,7 +109,6 @@ export class QueryHistory extends React.Component {
       </div>
     );
   }
-
   toggleFavorite = (query, variables, operationName, label, favorite) => {
     const item = {
       query,
@@ -118,7 +127,6 @@ export class QueryHistory extends React.Component {
       queries: [...this.historyStore.items, ...this.favoriteStore.items],
     });
   };
-
   editLabel = (query, variables, operationName, label, favorite) => {
     const item = {
       query,

@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { astFromValue, print } from 'graphql';
+import { astFromValue, print, GraphQLInputField } from 'graphql';
 
-export default function DefaultValue({ field }) {
+type DefaultValueProps = {
+  field: GraphQLInputField
+};
+
+export default function DefaultValue({ field }: DefaultValueProps) {
   const { type, defaultValue } = field;
   if (defaultValue !== undefined) {
     return (
@@ -24,7 +27,3 @@ export default function DefaultValue({ field }) {
 
   return null;
 }
-
-DefaultValue.propTypes = {
-  field: PropTypes.object.isRequired,
-};

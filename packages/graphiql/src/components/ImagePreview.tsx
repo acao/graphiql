@@ -5,19 +5,16 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 
-function tokenToURL(token) {
+function tokenToURL(token): URL {
   if (token.type !== 'string') {
     return null;
   }
-
   const value = token.string
     .slice(1)
     .slice(0, -1)
     .trim();
-
   try {
     const location = window.location;
     return new URL(value, location.protocol + '//' + location.host);
@@ -26,39 +23,46 @@ function tokenToURL(token) {
   }
 }
 
-function isImageURL(url) {
+function isImageURL(url: URL) {
   return /(bmp|gif|jpeg|jpg|png|svg)$/.test(url.pathname);
 }
 
-export class ImagePreview extends React.Component {
-  static propTypes = {
-    token: PropTypes.any,
-  };
+type ImagePreviewProps = {
+  token?: any;
+};
 
+type ImagePreviewState = {
+  src: any;
+  mime: string | null;
+  height: any;
+  width: any;
+};
+
+export class ImagePreview extends React.Component<
+  ImagePreviewProps,
+  ImagePreviewState
+> {
+  _node: HTMLImageElement;
   static shouldRender(token) {
     const url = tokenToURL(token);
     return url ? isImageURL(url) : false;
   }
-
   constructor(props) {
     super(props);
+    this.state = {
+      width: null,
+      height: null,
+      src: null,
+      mime: null,
+    };
   }
-
-  state = {
-    width: null,
-    height: null,
-    src: null,
-    mime: null,
-  };
 
   componentDidMount() {
     this._updateMetadata();
   }
-
   componentDidUpdate() {
     this._updateMetadata();
   }
-
   render() {
     let dims = null;
     if (this.state.width !== null && this.state.height !== null) {
@@ -66,10 +70,8 @@ export class ImagePreview extends React.Component {
       if (this.state.mime !== null) {
         dimensions += ' ' + this.state.mime;
       }
-
       dims = <div>{dimensions}</div>;
     }
-
     return (
       <div>
         <img
@@ -77,22 +79,19 @@ export class ImagePreview extends React.Component {
           ref={node => {
             this._node = node;
           }}
-          src={tokenToURL(this.props.token)}
+          src={tokenToURL(this.props.token).toString()}
         />
         {dims}
       </div>
     );
   }
-
   _updateMetadata() {
     if (!this._node) {
       return;
     }
-
     const width = this._node.naturalWidth;
     const height = this._node.naturalHeight;
     const src = this._node.src;
-
     if (src !== this.state.src) {
       this.setState({ src });
       fetch(src, { method: 'HEAD' }).then(response => {
@@ -101,7 +100,6 @@ export class ImagePreview extends React.Component {
         });
       });
     }
-
     if (width !== this.state.width || height !== this.state.height) {
       this.setState({ height, width });
     }

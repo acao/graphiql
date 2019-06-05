@@ -1,5 +1,17 @@
+import StorageAPI from './StorageAPI';
+
+type GraphQLQueryItem = {
+  query: string;
+  variables: any;
+  operationName: string;
+};
+
 export default class QueryStore {
-  constructor(key, storage) {
+  items: GraphQLQueryItem[];
+  storage: StorageAPI;
+  key: string
+
+  constructor(key: string, storage: StorageAPI) {
     this.key = key;
     this.storage = storage;
     this.items = this.fetchAll();
@@ -9,7 +21,7 @@ export default class QueryStore {
     return this.items.length;
   }
 
-  contains(item) {
+  contains(item: GraphQLQueryItem) {
     return this.items.some(
       x =>
         x.query === item.query &&
@@ -18,7 +30,7 @@ export default class QueryStore {
     );
   }
 
-  edit(item) {
+  edit(item: GraphQLQueryItem) {
     const itemIndex = this.items.findIndex(
       x =>
         x.query === item.query &&
@@ -31,7 +43,7 @@ export default class QueryStore {
     }
   }
 
-  delete(item) {
+  delete(item: GraphQLQueryItem) {
     const itemIndex = this.items.findIndex(
       x =>
         x.query === item.query &&
@@ -56,7 +68,7 @@ export default class QueryStore {
     return [];
   }
 
-  push(item) {
+  push(item: GraphQLQueryItem) {
     this.items.push(item);
     this.save();
   }

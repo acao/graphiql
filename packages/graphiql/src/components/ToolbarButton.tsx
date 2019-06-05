@@ -4,27 +4,32 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 
 /**
  * ToolbarButton
  *
  * A button to use within the Toolbar.
  */
-export class ToolbarButton extends React.Component {
-  static propTypes = {
-    onClick: PropTypes.func,
-    title: PropTypes.string,
-    label: PropTypes.string,
-  };
 
+type ToolbarButtonProps = {
+  onClick?: (...args: any[]) => any;
+  title?: string;
+  label?: string;
+};
+
+type ToolbarButtonState = {
+  error: null;
+};
+
+export class ToolbarButton extends React.Component<
+  ToolbarButtonProps,
+  ToolbarButtonState
+> {
   constructor(props) {
     super(props);
     this.state = { error: null };
   }
-
   render() {
     const { error } = this.state;
     return (
@@ -37,7 +42,6 @@ export class ToolbarButton extends React.Component {
       </a>
     );
   }
-
   handleClick = e => {
     e.preventDefault();
     try {

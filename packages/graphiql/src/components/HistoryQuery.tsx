@@ -4,23 +4,29 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
+import * as React from 'react';
 
-import React from 'react';
-import PropTypes from 'prop-types';
+type HistoryQueryProps = {
+  favorite?: boolean;
+  favoriteSize?: number;
+  handleEditLabel?: (...args: any[]) => any;
+  handleToggleFavorite?: (...args: any[]) => any;
+  operationName?: string;
+  onSelect?: (...args: any[]) => any;
+  query?: string;
+  variables?: string;
+  label?: string;
+};
 
-export default class HistoryQuery extends React.Component {
-  static propTypes = {
-    favorite: PropTypes.bool,
-    favoriteSize: PropTypes.number,
-    handleEditLabel: PropTypes.func,
-    handleToggleFavorite: PropTypes.func,
-    operationName: PropTypes.string,
-    onSelect: PropTypes.func,
-    query: PropTypes.string,
-    variables: PropTypes.string,
-    label: PropTypes.string,
-  };
+type HistoryQueryState = {
+  showButtons: boolean;
+  editable: boolean;
+};
 
+export default class HistoryQuery extends React.Component<
+  HistoryQueryProps,
+  HistoryQueryState
+> {
   constructor(props) {
     super(props);
     this.state = {
@@ -28,7 +34,6 @@ export default class HistoryQuery extends React.Component {
       editable: false,
     };
   }
-
   render() {
     const editStyles = {
       display: this.state.showButtons ? '' : 'none',
@@ -73,17 +78,13 @@ export default class HistoryQuery extends React.Component {
       </p>
     );
   }
-
   editField = null;
-
   handleMouseEnter() {
     this.setState({ showButtons: true });
   }
-
   handleMouseLeave() {
     this.setState({ showButtons: false });
   }
-
   handleClick() {
     this.props.onSelect(
       this.props.query,
@@ -92,8 +93,7 @@ export default class HistoryQuery extends React.Component {
       this.props.label,
     );
   }
-
-  handleStarClick(e) {
+  handleStarClick(e: React.MouseEvent) {
     e.stopPropagation();
     this.props.handleToggleFavorite(
       this.props.query,
@@ -103,20 +103,18 @@ export default class HistoryQuery extends React.Component {
       this.props.favorite,
     );
   }
-
-  handleFieldBlur(e) {
+  handleFieldBlur(e: React.FocusEvent) {
     e.stopPropagation();
     this.setState({ editable: false });
     this.props.handleEditLabel(
       this.props.query,
       this.props.variables,
       this.props.operationName,
-      e.target.value,
+      null,
       this.props.favorite,
     );
   }
-
-  handleFieldKeyDown(e) {
+  handleFieldKeyDown(e: React.KeyboardEvent) {
     if (e.keyCode === 13) {
       e.stopPropagation();
       this.setState({ editable: false });
@@ -124,13 +122,12 @@ export default class HistoryQuery extends React.Component {
         this.props.query,
         this.props.variables,
         this.props.operationName,
-        e.target.value,
+        null,
         this.props.favorite,
       );
     }
   }
-
-  handleEditClick(e) {
+  handleEditClick(e: React.MouseEvent) {
     e.stopPropagation();
     this.setState({ editable: true }, () => {
       if (this.editField) {

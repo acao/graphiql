@@ -1,16 +1,22 @@
+export interface LocalStorage {
+  getItem: (key: string) => any;
+  removeItem: (key: string) => undefined;
+  setItem: (key: string, value: any) => undefined;
+  length: number;
+}
+
 /**
  *  Copyright (c) Facebook, Inc. and its affiliates.
  *
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
 export default class StorageAPI {
-  constructor(storage) {
+  storage: LocalStorage;
+  constructor(storage: LocalStorage) {
     this.storage = storage || window.localStorage;
   }
-
-  get(name) {
+  get(name: string) {
     if (this.storage) {
       const value = this.storage.getItem('graphiql:' + name);
       // Clean up any inadvertently saved null/undefined values.
@@ -21,8 +27,7 @@ export default class StorageAPI {
       }
     }
   }
-
-  set(name, value) {
+  set(name: string, value: any) {
     if (this.storage) {
       const key = `graphiql:${name}`;
       if (value) {
@@ -37,7 +42,7 @@ export default class StorageAPI {
   }
 }
 
-function isStorageAvailable(storage, key, value) {
+function isStorageAvailable(storage: LocalStorage, key: string, value: any) {
   try {
     storage.setItem(key, value);
     return true;

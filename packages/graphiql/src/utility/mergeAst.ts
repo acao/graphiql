@@ -5,6 +5,33 @@
  *  LICENSE file in the root directory of this source tree.
  */
 import { Kind } from 'graphql/language/kinds';
+import {
+  FragmentDefinitionNode,
+  Location,
+  DocumentNode,
+  DefinitionNode,
+  NameNode,
+  VariableDefinitionNode,
+  NamedTypeNode,
+  DirectiveNode,
+  SelectionSetNode,
+} from 'graphql';
+
+interface MutableDocumentNode extends DocumentNode {
+  definitions: ReadonlyArray<DefinitionNode>;
+}
+
+interface MutableFragmentDefinitionNode {
+  kind: 'FragmentDefinition' | 'InlineFragment';
+  readonly loc?: Location;
+  readonly name: NameNode;
+  // Note: fragment variable definitions are experimental and may be changed
+  // or removed in the future.
+  readonly variableDefinitions?: ReadonlyArray<VariableDefinitionNode>;
+  readonly typeCondition: NamedTypeNode;
+  readonly directives?: ReadonlyArray<DirectiveNode>;
+  readonly selectionSet: SelectionSetNode;
+}
 
 function resolveDefinition(fragments, obj) {
   let definition = obj;
@@ -30,13 +57,13 @@ function resolveDefinition(fragments, obj) {
   return definition;
 }
 
-export function mergeAst(queryAst) {
-  const fragments = {};
+export function mergeAst(queryAst: MutableDocumentNode) {
+  const fragments: { [key: string]: MutableFragmentDefinitionNode } = {};
   queryAst.definitions
     .filter(elem => {
       return elem.kind === Kind.FRAGMENT_DEFINITION;
     })
-    .forEach(frag => {
+    .forEach((frag: MutableFragmentDefinitionNode) => {
       const copyFragment = Object.assign({}, frag);
       copyFragment.kind = Kind.INLINE_FRAGMENT;
       fragments[frag.name.value] = copyFragment;

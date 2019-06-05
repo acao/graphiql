@@ -4,10 +4,9 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import * as CodeMirror from 'codemirror'
 
 /**
  * ResultViewer
@@ -19,17 +18,19 @@ import PropTypes from 'prop-types';
  *   - value: The text of the editor.
  *
  */
-export class ResultViewer extends React.Component {
-  static propTypes = {
-    value: PropTypes.string,
-    editorTheme: PropTypes.string,
-    ResultsTooltip: PropTypes.any,
-    ImagePreview: PropTypes.any,
-  };
-  constructor() {
-    super();
-  }
 
+type ResultViewerProps = {
+  value?: string;
+  editorTheme?: string;
+  ResultsTooltip?: any;
+  ImagePreview?: any;
+};
+
+export class ResultViewer extends React.Component<ResultViewerProps, {}> {
+  viewer: CodeMorror.Editor
+  constructor(props) {
+    super(props);
+  }
   componentDidMount() {
     // Lazily require to ensure requiring GraphiQL outside of a Browser context
     // does not produce an error.
@@ -42,7 +43,6 @@ export class ResultViewer extends React.Component {
     require('codemirror/addon/search/jump-to-line');
     require('codemirror/keymap/sublime');
     require('codemirror-graphql/results/mode');
-
     if (this.props.ResultsTooltip || this.props.ImagePreview) {
       require('codemirror-graphql/utils/info-addon');
       const tooltipDiv = document.createElement('div');
@@ -52,12 +52,10 @@ export class ResultViewer extends React.Component {
         (token, options, cm, pos) => {
           const Tooltip = this.props.ResultsTooltip;
           const ImagePreview = this.props.ImagePreview;
-
           const infoElements = [];
           if (Tooltip) {
             infoElements.push(<Tooltip pos={pos} />);
           }
-
           if (
             ImagePreview &&
             typeof ImagePreview.shouldRender === 'function' &&
@@ -65,16 +63,13 @@ export class ResultViewer extends React.Component {
           ) {
             infoElements.push(<ImagePreview token={token} />);
           }
-
           if (infoElements.length > 0) {
             ReactDOM.render(<div>{infoElements}</div>, tooltipDiv);
           }
-
           return tooltipDiv;
         },
       );
     }
-
     this.viewer = CodeMirror(this._node, {
       lineWrapping: true,
       value: this.props.value || '',
@@ -93,7 +88,6 @@ export class ResultViewer extends React.Component {
         'Ctrl-F': 'findPersistent',
         'Cmd-G': 'findPersistent',
         'Ctrl-G': 'findPersistent',
-
         // Editor improvements
         'Ctrl-Left': 'goSubwordLeft',
         'Ctrl-Right': 'goSubwordRight',
@@ -102,19 +96,15 @@ export class ResultViewer extends React.Component {
       },
     });
   }
-
   shouldComponentUpdate(nextProps) {
     return this.props.value !== nextProps.value;
   }
-
   componentDidUpdate() {
     this.viewer.setValue(this.props.value || '');
   }
-
   componentWillUnmount() {
     this.viewer = null;
   }
-
   render() {
     return (
       <div
@@ -125,7 +115,6 @@ export class ResultViewer extends React.Component {
       />
     );
   }
-
   /**
    * Public API for retrieving the CodeMirror instance from this
    * React component.
@@ -133,7 +122,6 @@ export class ResultViewer extends React.Component {
   getCodeMirror() {
     return this.viewer;
   }
-
   /**
    * Public API for retrieving the DOM client height for this component.
    */

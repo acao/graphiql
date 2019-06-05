@@ -4,31 +4,27 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-
 import React from 'react';
-import PropTypes from 'prop-types';
-
+import { GraphQLSchema } from 'graphql'
 import TypeLink from './TypeLink';
 import MarkdownContent from './MarkdownContent';
 
 // Render the top level Schema
-export default class SchemaDoc extends React.Component {
-  static propTypes = {
-    schema: PropTypes.object,
-    onClickType: PropTypes.func,
-  };
 
+type SchemaDocProps = {
+  schema?: GraphQLSchema;
+  onClickType?: (...args: any[]) => any;
+}
+export default class SchemaDoc extends React.Component<SchemaDocProps, {}> {
   shouldComponentUpdate(nextProps) {
     return this.props.schema !== nextProps.schema;
   }
-
   render() {
     const schema = this.props.schema;
     const queryType = schema.getQueryType();
     const mutationType = schema.getMutationType && schema.getMutationType();
     const subscriptionType =
       schema.getSubscriptionType && schema.getSubscriptionType();
-
     return (
       <div>
         <MarkdownContent
@@ -38,21 +34,20 @@ export default class SchemaDoc extends React.Component {
           }
         />
         <div className="doc-category">
-          <div className="doc-category-title">
-            {'root types'}
-          </div>
+          <div className="doc-category-title">{'root types'}</div>
           <div className="doc-category-item">
             <span className="keyword">{'query'}</span>
             {': '}
             <TypeLink type={queryType} onClick={this.props.onClickType} />
           </div>
-          {mutationType &&
+          {mutationType && (
             <div className="doc-category-item">
               <span className="keyword">{'mutation'}</span>
               {': '}
               <TypeLink type={mutationType} onClick={this.props.onClickType} />
-            </div>}
-          {subscriptionType &&
+            </div>
+          )}
+          {subscriptionType && (
             <div className="doc-category-item">
               <span className="keyword">{'subscription'}</span>
               {': '}
@@ -60,7 +55,8 @@ export default class SchemaDoc extends React.Component {
                 type={subscriptionType}
                 onClick={this.props.onClickType}
               />
-            </div>}
+            </div>
+          )}
         </div>
       </div>
     );
