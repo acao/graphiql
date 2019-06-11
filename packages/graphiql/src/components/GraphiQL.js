@@ -1,16 +1,8 @@
-/**
- *  Copyright (c) Facebook, Inc. and its affiliates.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { buildClientSchema, GraphQLSchema, parse, print } from 'graphql';
 import copyToClipboard from 'copy-to-clipboard';
-
 import { ExecuteButton } from './ExecuteButton';
 import { ImagePreview } from './ImagePreview';
 import { ToolbarButton } from './ToolbarButton';

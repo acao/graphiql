@@ -1,9 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { expect } from 'chai';
-
 import TypeLink from '../TypeLink';
-
 import { GraphQLNonNull, GraphQLList, GraphQLString } from 'graphql';
 
 const nonNullType = new GraphQLNonNull(GraphQLString);

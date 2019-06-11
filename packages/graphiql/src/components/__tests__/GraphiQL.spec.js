@@ -1,13 +1,7 @@
-/**
- *  Copyright (c) Facebook, Inc. and its affiliates.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- */
+
 import { expect } from 'chai';
 import React from 'react';
 import { mount } from 'enzyme';
-
 import { GraphiQL } from '../GraphiQL';
 
 const mockStorage = (function() {

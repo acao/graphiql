@@ -1,9 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { expect } from 'chai';
-
 import FieldDoc from '../FieldDoc';
-
 import { GraphQLString, GraphQLObjectType } from 'graphql';
 
 const exampleObject = new GraphQLObjectType({

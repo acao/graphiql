@@ -1,11 +1,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { expect } from 'chai';
-
 import { GraphQLString } from 'graphql';
-
 import TypeDoc from '../TypeDoc';
-
 import {
   ExampleSchema,
   ExampleQuery,

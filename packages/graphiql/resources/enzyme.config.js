@@ -2,8 +2,6 @@
 require('@babel/polyfill', {
   rootMode: 'upward'
 })
-
-
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-15';
 

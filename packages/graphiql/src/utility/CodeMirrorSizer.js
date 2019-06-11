@@ -1,11 +1,4 @@
 /**
- *  Copyright (c) Facebook, Inc. and its affiliates.
- *
- *  This source code is licensed under the MIT license found in the
- *  LICENSE file in the root directory of this source tree.
- */
-
-/**
  * When a containing DOM node's height has been altered, trigger a resize of
  * the related CodeMirror instance so that it is always correctly sized.
  */

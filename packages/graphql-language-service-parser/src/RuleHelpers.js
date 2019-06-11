@@ -1,16 +1,10 @@
 /**
- *  Copyright (c) Facebook, Inc.
- *  All rights reserved.
- *
- *  This source code is licensed under the license found in the
- *  LICENSE file in the root directory of this source tree.
- *
  *  @flow
  */
 
-// These functions help build matching rules for ParseRules.
+import type { Rule, Token } from 'graphql-language-service-types'
 
-import type { Rule, Token } from 'graphql-language-service-types';
+// These functions help build matching rules for ParseRules.
 
 // An optional rule.
 export function opt(ofRule: Rule | string): Rule {
