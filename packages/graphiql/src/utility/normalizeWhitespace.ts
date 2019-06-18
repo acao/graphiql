@@ -6,7 +6,7 @@
  */
 
 // Unicode whitespace characters that break the interface.
-export const invalidCharacters = Array.from({ length: 11 }, (x, i) => {
+export const invalidCharacters = Array.from({ length: 11 }, (_x: null, i) => {
   // \u2000 -> \u200a
   return String.fromCharCode(0x2000 + i);
 }).concat(['\u2028', '\u2029', '\u202f', '\u00a0']);
