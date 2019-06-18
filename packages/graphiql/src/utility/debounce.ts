@@ -10,9 +10,15 @@
  * `duration` milliseconds after the last call.
  */
 export default function debounce(duration: number, fn: Function) {
-  let timeout: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout | null;
+
   return function() {
-    clearTimeout(timeout);
+    // if we have a timeout to clear
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    // create a new timeout
     timeout = setTimeout(function() {
       timeout = null;
       fn.apply(this, arguments);
