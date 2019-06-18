@@ -30,7 +30,7 @@ export default class CodeMirrorSizer {
     components.forEach((component, i) => {
       const size = component.getClientHeight();
       if (i <= this.sizes.length && size !== this.sizes[i]) {
-        component.getCodeMirror().setSize(null, null);
+        component.getCodeMirror().setSize(undefined, undefined);
       }
       this.sizes[i] = size;
     });
