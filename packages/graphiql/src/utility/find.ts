@@ -6,10 +6,12 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import { Maybe } from '../types';
+
 export default function find<T>(
   list: Array<T>,
   predicate: (item: T) => boolean,
-): T | null {
+): Maybe<T> {
   for (let i = 0; i < list.length; i++) {
     if (predicate(list[i])) {
       return list[i];

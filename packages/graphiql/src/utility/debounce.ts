@@ -5,12 +5,14 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import { Maybe } from '../types';
+
 /**
  * Provided a duration and a function, returns a new function which is called
  * `duration` milliseconds after the last call.
  */
 export default function debounce(duration: number, fn: Function) {
-  let timeout: NodeJS.Timeout | null;
+  let timeout: Maybe<NodeJS.Timeout>;
 
   return function() {
     // if we have a timeout to clear
@@ -18,7 +20,7 @@ export default function debounce(duration: number, fn: Function) {
       clearTimeout(timeout);
     }
 
-    // create a new timeout
+    // create
     timeout = setTimeout(function() {
       timeout = null;
       fn.apply(this, arguments);
