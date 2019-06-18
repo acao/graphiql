@@ -7,8 +7,16 @@
 import { getOperationAST, parse, introspectionQuery } from 'graphql';
 
 export { introspectionQuery } from 'graphql';
-export const introspectionQueryName = getOperationAST(parse(introspectionQuery))
-  .name.value;
+
+// look for the introspection operation definition
+const introspectionOperation = getOperationAST(
+  parse(introspectionQuery),
+  undefined,
+);
+export const introspectionQueryName =
+  introspectionOperation && introspectionOperation.name
+    ? introspectionOperation.name.value
+    : null;
 
 // Some GraphQL services do not support subscriptions and fail an introspection
 // query which includes the `subscriptionType` field as the stock introspection
