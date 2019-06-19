@@ -5,18 +5,22 @@
  *  LICENSE file in the root directory of this source tree.
  */
 import { Kind } from 'graphql/language/kinds';
-import { DocumentNode, FragmentDefinitionNode, DefinitionNode } from 'graphql';
+import {
+  DocumentNode,
+  FragmentDefinitionNode,
+  OperationDefinitionNode,
+  SelectionNode,
+} from 'graphql';
 
 type FragmentMap = { [key: string]: FragmentDefinitionNode };
 
-function resolveDefinition(fragments: FragmentMap, obj: DefinitionNode) {
-  let definition = obj;
-  if (definition.kind === Kind.FRAGMENT_SPREAD) {
-    definition = fragments[definition.name.value];
-  }
-
-  if (definition.selectionSet) {
-    definition.selectionSet.selections = definition.selectionSet.selections
+function resolveDefinition(
+  fragments: FragmentMap,
+  obj: OperationDefinitionNode,
+): OperationDefinitionNode {
+  // if the definition is something with a selection
+  if (obj.selectionSet) {
+    obj.selectionSet.selections = obj.selectionSet.selections
       .filter(
         (selection, idx, self) =>
           selection.kind !== Kind.FRAGMENT_SPREAD ||
@@ -27,14 +31,22 @@ function resolveDefinition(fragments: FragmentMap, obj: DefinitionNode) {
                 selection.name.value === _selection.name.value,
             ),
       )
-      .map(selection => resolveDefinition(fragments, selection));
+      .map(
+        selection =>
+          (selection.kind !== Kind.FRAGMENT_SPREAD
+            ? resolveDefinition(
+                fragments,
+                (selection as unknown) as OperationDefinitionNode,
+              )
+            : selection) as SelectionNode,
+      );
   }
 
-  return definition;
+  return obj;
 }
 
-export function mergeAst(queryAst: DocumentNode) {
-  // collect all of the fragments into a single map
+export function mergeAst(queryAst: DocumentNode): DocumentNode {
+  // collect inline versions of each fragments into a single map
   const fragments: FragmentMap = queryAst.definitions
     .filter(elem => elem.kind === Kind.FRAGMENT_DEFINITION)
     .reduce(
@@ -53,6 +65,7 @@ export function mergeAst(queryAst: DocumentNode) {
     ...queryAst,
     definitions: queryAst.definitions
       .filter(elem => elem.kind !== Kind.FRAGMENT_DEFINITION)
-      .map(op => resolveDefinition(fragments, op)),
+      // we have to also flatten any fragments in the definitions selection set
+      .map((op: OperationDefinitionNode) => resolveDefinition(fragments, op)),
   };
 }
