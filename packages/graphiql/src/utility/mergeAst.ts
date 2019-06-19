@@ -9,18 +9,24 @@ import {
   DocumentNode,
   FragmentDefinitionNode,
   OperationDefinitionNode,
-  SelectionNode,
 } from 'graphql';
 
-type FragmentMap = { [key: string]: FragmentDefinitionNode };
+type FragmentMap = { [key: string]: OperationDefinitionNode };
 
 function resolveDefinition(
   fragments: FragmentMap,
   obj: OperationDefinitionNode,
 ): OperationDefinitionNode {
+  // if we are dealing with a fragment spread then we have to look up that definition in the
+  // fragment definition map
+  const definition =
+    (obj as any).kind === Kind.FRAGMENT_SPREAD && obj.name
+      ? fragments[obj.name.value]
+      : obj;
+
   // if the definition is something with a selection
-  if (obj.selectionSet) {
-    obj.selectionSet.selections = obj.selectionSet.selections
+  if (definition.selectionSet) {
+    definition.selectionSet.selections = definition.selectionSet.selections
       .filter(
         (selection, idx, self) =>
           selection.kind !== Kind.FRAGMENT_SPREAD ||
@@ -31,18 +37,11 @@ function resolveDefinition(
                 selection.name.value === _selection.name.value,
             ),
       )
-      .map(
-        selection =>
-          (selection.kind !== Kind.FRAGMENT_SPREAD
-            ? resolveDefinition(
-                fragments,
-                (selection as unknown) as OperationDefinitionNode,
-              )
-            : selection) as SelectionNode,
-      );
+      // @ts-ignore
+      .map(selection => resolveDefinition(fragments, selection));
   }
 
-  return obj;
+  return definition;
 }
 
 export function mergeAst(queryAst: DocumentNode): DocumentNode {
