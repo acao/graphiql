@@ -5,35 +5,11 @@
  *  LICENSE file in the root directory of this source tree.
  */
 import { Kind } from 'graphql/language/kinds';
-import {
-  FragmentDefinitionNode,
-  Location,
-  DocumentNode,
-  DefinitionNode,
-  NameNode,
-  VariableDefinitionNode,
-  NamedTypeNode,
-  DirectiveNode,
-  SelectionSetNode,
-} from 'graphql';
+import { DocumentNode, FragmentDefinitionNode, DefinitionNode } from 'graphql';
 
-interface MutableDocumentNode extends DocumentNode {
-  definitions: ReadonlyArray<DefinitionNode>;
-}
+type FragmentMap = { [key: string]: FragmentDefinitionNode };
 
-interface MutableFragmentDefinitionNode {
-  kind: 'FragmentDefinition' | 'InlineFragment';
-  readonly loc?: Location;
-  readonly name: NameNode;
-  // Note: fragment variable definitions are experimental and may be changed
-  // or removed in the future.
-  readonly variableDefinitions?: ReadonlyArray<VariableDefinitionNode>;
-  readonly typeCondition: NamedTypeNode;
-  readonly directives?: ReadonlyArray<DirectiveNode>;
-  readonly selectionSet: SelectionSetNode;
-}
-
-function resolveDefinition(fragments, obj) {
+function resolveDefinition(fragments: FragmentMap, obj: DefinitionNode) {
   let definition = obj;
   if (definition.kind === Kind.FRAGMENT_SPREAD) {
     definition = fragments[definition.name.value];
@@ -57,24 +33,26 @@ function resolveDefinition(fragments, obj) {
   return definition;
 }
 
-export function mergeAst(queryAst: MutableDocumentNode) {
-  const fragments: { [key: string]: MutableFragmentDefinitionNode } = {};
-  queryAst.definitions
-    .filter(elem => {
-      return elem.kind === Kind.FRAGMENT_DEFINITION;
-    })
-    .forEach((frag: MutableFragmentDefinitionNode) => {
-      const copyFragment = Object.assign({}, frag);
-      copyFragment.kind = Kind.INLINE_FRAGMENT;
-      fragments[frag.name.value] = copyFragment;
-    });
+export function mergeAst(queryAst: DocumentNode) {
+  // collect all of the fragments into a single map
+  const fragments: FragmentMap = queryAst.definitions
+    .filter(elem => elem.kind === Kind.FRAGMENT_DEFINITION)
+    .reduce(
+      (acc, frag: FragmentDefinitionNode) => ({
+        ...acc,
+        [frag.name.value]: {
+          ...frag,
+          kind: Kind.INLINE_FRAGMENT,
+        },
+      }),
+      {},
+    );
 
-  const copyAst = Object.assign({}, queryAst);
-  copyAst.definitions = queryAst.definitions
-    .filter(elem => {
-      return elem.kind !== Kind.FRAGMENT_DEFINITION;
-    })
-    .map(op => resolveDefinition(fragments, op));
-
-  return copyAst;
+  // merge the definitions
+  return {
+    ...queryAst,
+    definitions: queryAst.definitions
+      .filter(elem => elem.kind !== Kind.FRAGMENT_DEFINITION)
+      .map(op => resolveDefinition(fragments, op)),
+  };
 }
