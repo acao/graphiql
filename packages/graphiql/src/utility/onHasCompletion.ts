@@ -6,6 +6,7 @@
  */
 import { GraphQLNonNull, GraphQLList, GraphQLType } from 'graphql';
 import MD from 'markdown-it';
+import { Doc } from 'codemirror';
 
 import { Maybe } from '../types';
 
@@ -16,8 +17,8 @@ const md = new MD();
  * about the type and description for the selected context.
  */
 export default function onHasCompletion(
-  _cm,
-  data,
+  _cm: any,
+  data: Doc,
   onHintInformationRender: Function,
 ) {
   const CodeMirror = require('codemirror');
@@ -26,10 +27,10 @@ export default function onHasCompletion(
   let deprecation: HTMLDivElement;
 
   // When a hint result is selected, we augment the UI with information.
-  CodeMirror.on(data, 'select', (ctx, el) => {
+  CodeMirror.on(data, 'select', (ctx, el: HTMLElement) => {
     // Only the first time (usually when the hint UI is first displayed)
     // do we create the information nodes.
-    if (!information) {
+    if (!information && el.parentNode) {
       const hintsUl: Node = el.parentNode;
 
       // This "information" node will contain the additional info about the
