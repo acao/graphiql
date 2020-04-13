@@ -5,7 +5,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import * as CM from 'codemirror';
 import { GraphQLType } from 'graphql';
 import MD from 'markdown-it';
@@ -17,7 +17,7 @@ import {
   useSessionContext,
   SessionHandlers,
 } from '../state/GraphiQLSessionProvider';
-import { useValueRef } from 'src/hooks/useValueRef';
+import useValueRef from '../hooks/useValueRef';
 
 const md = new MD();
 const AUTO_COMPLETE_AFTER_KEY = /^[a-zA-Z0-9_@(]$/;

@@ -6,7 +6,7 @@ import { useEffect, useRef, MutableRefObject } from 'react';
  * Returns a reference to a given value. Automatically updates the value of the refrence when the value updates
  *
  */
-export function useValueRef<T>(value: T): MutableRefObject<T> {
+export default function useValueRef<T>(value: T): MutableRefObject<T> {
   const ref = useRef(value);
 
   useEffect(() => {

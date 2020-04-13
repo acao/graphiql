@@ -7,12 +7,12 @@
 import { GraphQLType } from 'graphql';
 import * as CM from 'codemirror';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import onHasCompletion from '../utility/onHasCompletion';
 import commonKeys from '../utility/commonKeys';
 import { useSessionContext } from '../state/GraphiQLSessionProvider';
 import useQueryFacts from '../hooks/useQueryFacts';
-import { useValueRef } from 'src/hooks/useValueRef';
+import useValueRef from '../hooks/useValueRef';
 
 declare module CodeMirror {
   export interface Editor extends CM.Editor {}
