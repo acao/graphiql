@@ -10,7 +10,6 @@ export type FetcherResult = string;
 
 export type Fetcher = (
   graphQLParams: FetcherParams,
-  schemaConfig: SchemaConfig,
 ) => Promise<FetcherResult> | Observable<FetcherResult>;
 
 // These type just taken from https://github.com/ReactiveX/rxjs/blob/master/src/internal/types.ts#L41
@@ -62,7 +61,7 @@ export type SessionState = {
   variables: File;
   results: File;
   operationLoading: boolean;
-  operationErrors: Error[] | null;
+  operationError: Error | null;
   editors: { [key in EditorContexts]: CodeMirror.Editor };
   // diagnostics?: IMarkerData[];
   currentTabs?: { [pane: string]: number }; // maybe this could live in another context for each "pane"? within session context

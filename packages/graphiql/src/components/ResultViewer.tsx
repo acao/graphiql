@@ -84,10 +84,16 @@ export function ResultViewer(props: ResultViewerProps) {
   }, []);
 
   useEffect(() => {
-    if (session.results && viewerRef.current) {
-      viewerRef.current.setValue(session.results.text || '');
+    if (viewerRef.current) {
+      if (session.operationError) {
+        viewerRef.current.setValue(
+          JSON.stringify(session.operationError, null, 2),
+        );
+      } else if (session.results) {
+        viewerRef.current.setValue(session.results.text || '');
+      }
     }
-  }, [session.results, session.results.text]);
+  }, [session.results, session.operationError, session.results.text]);
 
   return (
     <section

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { GraphQLSchema } from 'graphql';
-import { defaultSchemaLoader } from './common';
-import { SchemaConfig } from './types';
+import { fetchSchema } from './common';
+import { SchemaConfig, Fetcher } from './types';
 import {
   SchemaAction,
   SchemaActionTypes,
@@ -56,7 +56,6 @@ export const SchemaContext = React.createContext<SchemaContextValue>({
   loadCurrentSchema: async () => undefined,
   // loadSchema: async () => undefined,
   dispatch: async () => undefined,
-  schemaLoader: defaultSchemaLoader,
 });
 
 export const useSchemaContext = () => React.useContext(SchemaContext);
@@ -104,19 +103,17 @@ export const schemaReducer: SchemaReducer = (state, action): SchemaState => {
 
 export type SchemaProviderProps = {
   config?: SchemaConfig;
-  schemaLoader?: typeof defaultSchemaLoader;
   children?: any;
+  fetcher: Fetcher;
 };
 
 export type ProjectHandlers = {
-  // loadSchema: (state: SchemaState, config: SchemaConfig) => Promise<void>;
   loadCurrentSchema: (state: SchemaState) => Promise<void>;
-  schemaLoader: typeof defaultSchemaLoader;
   dispatch: React.Dispatch<SchemaAction>;
 };
 
 export function SchemaProvider({
-  schemaLoader = defaultSchemaLoader,
+  fetcher,
   config: userSchemaConfig = initialReducerState.config,
   ...props
 }: SchemaProviderProps) {
@@ -128,14 +125,14 @@ export function SchemaProvider({
   const loadCurrentSchema = useCallback(async () => {
     dispatch(schemaRequestedAction());
     try {
-      const schema = await schemaLoader(state.config);
+      const schema = await fetchSchema(fetcher);
       if (schema) {
         dispatch(schemaSucceededAction(schema));
       }
     } catch (error) {
       dispatch(schemaErroredAction(error));
     }
-  }, [dispatch, schemaLoader, state.config]);
+  }, [dispatch, fetcher]);
 
   useEffect(() => {
     loadCurrentSchema();
@@ -145,7 +142,6 @@ export function SchemaProvider({
     <SchemaContext.Provider
       value={{
         ...state,
-        schemaLoader,
         loadCurrentSchema,
         dispatch,
       }}>

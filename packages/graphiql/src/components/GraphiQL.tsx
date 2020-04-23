@@ -36,6 +36,7 @@ import {
   SessionContext,
 } from '../state/GraphiQLSessionProvider';
 import { Fetcher, Unsubscribable } from '../state/types';
+import { getFetcher } from '../state/common';
 
 const DEFAULT_DOC_EXPLORER_WIDTH = 350;
 
@@ -67,10 +68,11 @@ type Formatters = {
   formatError: (rawError: Error) => string;
 };
 
-export type GraphiQLProps = {
+type GraphiQLProps = {
   fetcher: Fetcher;
   schema: GraphQLSchema | null;
   query?: string;
+  uri?: string;
   variables?: string;
   operationName?: string;
   response?: string;
@@ -78,7 +80,7 @@ export type GraphiQLProps = {
   defaultQuery?: string;
   defaultVariableEditorOpen?: boolean;
   onCopyQuery?: (query?: string) => void;
-  onEditQuery?: (query?: string) => void;
+  onEditQuery?: () => void;
   onEditVariables?: (value: string) => void;
   onEditOperationName?: (operationName: string) => void;
   onToggleDocs?: (docExplorerOpen: boolean) => void;
@@ -92,7 +94,7 @@ export type GraphiQLProps = {
   formatError?: (rawError: Error) => string;
 } & Partial<Formatters>;
 
-export type GraphiQLState = {
+type GraphiQLState = {
   operationName?: string;
   docExplorerOpen: boolean;
   response?: string;
@@ -114,9 +116,10 @@ export type GraphiQLState = {
  * @see https://github.com/graphql/graphiql#usage
  */
 export const GraphiQL: React.FC<GraphiQLProps> = props => {
+  const fetcher = getFetcher(props.fetcher, props.uri);
   return (
-    <SchemaProvider {...props}>
-      <SessionProvider sessionId={0} {...props}>
+    <SchemaProvider fetcher={fetcher} {...props}>
+      <SessionProvider fetcher={fetcher} sessionId={0} {...props}>
         <GraphiQLInternals
           {...{
             formatResult,
@@ -173,11 +176,6 @@ class GraphiQLInternals extends React.Component<
 
   constructor(props: GraphiQLInternalsProps & Formatters) {
     super(props);
-    // Ensure props are correct
-    if (typeof props.fetcher !== 'function') {
-      throw new TypeError('GraphiQL requires a fetcher function.');
-    }
-
     // Cache the storage instance
     this._storage = new StorageAPI(props.storage);
 

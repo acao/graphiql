@@ -3,8 +3,6 @@ import { Fetcher } from './types';
 
 import { GraphQLParams, SessionState, EditorContexts } from './types';
 
-import { defaultFetcher } from './common';
-import { SchemaContext } from './GraphiQLSchemaProvider';
 import {
   SessionAction,
   SessionActionTypes,
@@ -22,7 +20,7 @@ export interface SessionHandlers {
   changeOperation: (operation: string) => void;
   changeVariables: (variables: string) => void;
   executeOperation: (operationName?: string) => Promise<void>;
-  operationError: (error: Error) => void;
+  operationErrored: (error: Error) => void;
   editorLoaded: (context: EditorContexts, editor: CodeMirror.Editor) => void;
   dispatch: React.Dispatch<SessionAction>;
 }
@@ -38,7 +36,7 @@ export const initialState: SessionState = {
     results: 0,
   },
   operationLoading: true,
-  operationErrors: null,
+  operationError: null,
   operations: [],
   // @ts-ignore
   editors: {},
@@ -48,7 +46,7 @@ export const initialContextState: SessionState & SessionHandlers = {
   executeOperation: async () => {},
   changeOperation: () => null,
   changeVariables: () => null,
-  operationError: () => null,
+  operationErrored: () => null,
   dispatch: () => null,
   editorLoaded: () => null,
   ...initialState,
@@ -105,16 +103,18 @@ const sessionReducer: SessionReducer = (state, action) => {
           ...state.results,
           text: JSON.stringify(result, null, 2),
         },
-        operationErrors: null,
+        operationError: null,
       };
     }
     case SessionActionTypes.OperationErrored: {
       const { error } = action.payload;
       return {
         ...state,
-        operationErrors: state.operationErrors
-          ? [...state.operationErrors, error]
-          : [error],
+        operationError: error,
+        results: {
+          ...state.results,
+          text: undefined,
+        },
       };
     }
     default: {
@@ -125,25 +125,23 @@ const sessionReducer: SessionReducer = (state, action) => {
 
 export type SessionProviderProps = {
   sessionId: number;
-  fetcher?: Fetcher;
+  fetcher: Fetcher;
   session?: SessionState;
   children: React.ReactNode;
 };
 
 export function SessionProvider({
   sessionId,
-  fetcher = defaultFetcher,
+  fetcher,
   session,
   children,
 }: SessionProviderProps) {
-  const schemaState = React.useContext(SchemaContext);
-
   const [state, dispatch] = React.useReducer<SessionReducer>(
     sessionReducer,
     initialState,
   );
 
-  const operationError = React.useCallback(
+  const operationErrored = React.useCallback(
     (error: Error) => dispatch(operationErroredAction(error, sessionId)),
     [dispatch, sessionId],
   );
@@ -179,20 +177,17 @@ export function SessionProvider({
         if (operationName) {
           fetchValues.operationName = operationName as string;
         }
-        const result = await observableToPromise(
-          fetcher(fetchValues, schemaState.config),
-        );
+        const result = await observableToPromise(fetcher(fetchValues));
         dispatch(operationSucceededAction(result, sessionId));
       } catch (err) {
-        console.error(err.name, err.stack);
-        operationError(err);
+        console.error(err);
+        operationErrored(err);
       }
     },
     [
       dispatch,
       fetcher,
-      operationError,
-      schemaState.config,
+      operationErrored,
       sessionId,
       state.operation,
       state.variables,
@@ -207,7 +202,7 @@ export function SessionProvider({
         executeOperation,
         changeOperation,
         changeVariables,
-        operationError,
+        operationErrored,
         editorLoaded,
         dispatch,
       }}>
