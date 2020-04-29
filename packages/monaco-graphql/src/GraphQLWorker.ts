@@ -27,7 +27,7 @@ import {
   toCompletion,
 } from './utils';
 
-import { GraphQLSchema } from 'graphql';
+import type { GraphQLSchema, DocumentNode } from 'graphql';
 
 export type MonacoCompletionItem = monaco.languages.CompletionItem & {
   isDeprecated?: boolean;
@@ -55,12 +55,15 @@ export class GraphQLWorker {
     this._languageService = new LanguageService(serviceConfig);
     this._formattingOptions = createData.formattingOptions;
   }
+
   async getSchemaResponse(_uri?: string): Promise<SchemaResponse> {
     return this._languageService.getSchemaResponse();
   }
+
   async loadSchema(_uri?: string): Promise<GraphQLSchema> {
     return this._languageService.getSchema();
   }
+
   async doValidation(uri: string): Promise<editor.IMarkerData[]> {
     const document = this._getTextDocument(uri);
     const graphqlDiagnostics = await this._languageService.getDiagnostics(
@@ -112,14 +115,15 @@ export class GraphQLWorker {
       range: toMonacoRange(
         getRange(
           {
-            column: graphQLPosition.character + 1,
-            line: graphQLPosition.line + 1,
+            column: graphQLPosition.character,
+            line: graphQLPosition.line,
           },
           document,
         ),
       ),
     };
   }
+
   async doFormat(text: string): Promise<string> {
     const prettierStandalone = await import('prettier/standalone');
     const prettierGraphqlParser = await import('prettier/parser-graphql');
@@ -129,6 +133,10 @@ export class GraphQLWorker {
       parser: 'graphql',
       plugins: [prettierGraphqlParser],
     });
+  }
+
+  async doParse(text: string): Promise<DocumentNode> {
+    return this._languageService.parse(text);
   }
 
   private _getTextDocument(_uri: string): string {

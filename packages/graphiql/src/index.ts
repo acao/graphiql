@@ -9,8 +9,6 @@
 // eslint-disable-next-line spaced-comment
 /// <reference path='../../../packages/monaco-graphql/src/typings/monaco.d.ts'/>
 
-import 'regenerator-runtime/runtime';
-
 import { GraphiQL } from './components/GraphiQL';
 
 export { GraphiQL };

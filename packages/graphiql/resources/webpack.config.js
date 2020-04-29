@@ -1,6 +1,5 @@
 const path = require('path');
-// const webpack = require('webpack');
-// const MonacoEditorWebpackPlugin = require('monaco-editor-webpack-plugin');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -46,6 +45,9 @@ const resultConfig = {
   externals: {
     react: 'React',
     'react-dom': 'ReactDOM',
+  },
+  optimization: {
+    splitChunks: { name: 'vendor' },
   },
   module: {
     rules: [
@@ -113,9 +115,10 @@ const resultConfig = {
       async: isDev,
       tsconfig: rootPath('tsconfig.json'),
     }),
-    // new MonacoEditorWebpackPlugin({
-    //   languages: ['json'],
-    // }),
+    // TODO: reduces bundle size, but then we lose the JSON grammar
+    // new webpack.IgnorePlugin({
+    //   contextRegExp: /monaco-editor\/esm\/vs\/language\/css\/$/
+    // })
   ],
   resolve: {
     extensions: ['.mjs', '.js', '.json', '.jsx', '.css', '.ts', '.tsx'],
@@ -133,7 +136,8 @@ const cssLoaders = [
 if (!isDev) {
   cssLoaders.push('postcss-loader');
 } else {
-  //  resultConfig.plugins.push(new ErrorOverlayPlugin());
+  // TODO: This worked, but somehow this ended up totally busted
+  // resultConfig.plugins.push(new ErrorOverlayPlugin());
 }
 
 if (process.env.ANALYZE) {

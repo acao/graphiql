@@ -1,3 +1,4 @@
+/* global monaco */
 import * as React from 'react';
 import { Fetcher } from '../../types';
 
@@ -16,6 +17,7 @@ import {
 } from '../actions/sessionActions';
 
 import { observableToPromise } from '../../utility/observableToPromise';
+// import { KeyMod, KeyCode } from 'monaco-editor';
 
 export type SessionReducer = React.Reducer<SessionState, SessionAction>;
 export interface SessionHandlers {
@@ -183,6 +185,20 @@ export function SessionProvider({
       editorsState.editors,
     ],
   );
+
+  React.useEffect(() => {
+    if (editorsState.editors.operation) {
+      editorsState.editors.operation.editor.addAction({
+        id: 'run-command',
+        label: 'Run Operation',
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: async () => {
+          return executeOperation();
+        },
+      });
+    }
+  }, [editorsState.editors.operation, executeOperation]);
 
   return (
     <SessionContext.Provider

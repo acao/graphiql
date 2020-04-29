@@ -5,6 +5,8 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+import { Uri, IDisposable } from 'monaco-editor';
+
 import IRichLanguageConfiguration = monaco.languages.LanguageConfiguration;
 
 import { WorkerManager } from './workerManager';
@@ -12,7 +14,7 @@ import { GraphQLWorker } from './GraphQLWorker';
 import { monarchLanguage } from './monaco.contribution';
 import { LanguageServiceDefaultsImpl } from './defaults';
 import * as languageFeatures from './languageFeatures';
-import { Uri, IDisposable } from 'monaco-editor';
+import { MonacoGraphQLApi } from './api';
 
 export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const disposables: IDisposable[] = [];
@@ -21,28 +23,19 @@ export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const { languageId } = defaults;
   // client.getLanguageServiceWorker()
   disposables.push(client);
-  let uriList: Uri[] = [];
   const worker: languageFeatures.WorkerAccessor = (
     ...uris: Uri[]
   ): Promise<GraphQLWorker> => {
     try {
-      uriList = uris;
       return client.getLanguageServiceWorker(...uris);
     } catch (err) {
       throw Error('Error fetching graphql language service worker');
     }
   };
-
-  const getSchema = async () => {
-    try {
-      const langWorker = await worker(...uriList);
-      return langWorker.getSchemaResponse();
-    } catch (err) {
-      console.log(err);
-    }
-  };
   // @ts-ignore
-  monaco.languages.graphql.getSchema = getSchema;
+  monaco.languages.graphql.api = new MonacoGraphQLApi({ accessor: worker });
+  // @ts-ignore
+  console.log(monaco.languages.graphql.api.getSchema);
 
   monaco.languages.setLanguageConfiguration(languageId, richLanguageConfig);
   monaco.languages.setMonarchTokensProvider(languageId, monarchLanguage);

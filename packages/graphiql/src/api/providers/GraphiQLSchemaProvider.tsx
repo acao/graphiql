@@ -1,10 +1,10 @@
+/* global monaco */
+
 import React, { useCallback } from 'react';
 import { GraphQLSchema } from 'graphql';
 import { SchemaConfig, Fetcher } from '../../types';
 
 import { buildSchemaFromResponse } from 'graphql-languageservice';
-
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import {
   SchemaAction,
@@ -121,9 +121,9 @@ export function SchemaProvider({
     dispatch(schemaRequestedAction());
     try {
       // @ts-ignore
-      if (monaco.languages.graphql.getSchema) {
+      if (monaco.languages.graphql?.api.getSchema) {
         // @ts-ignore
-        const schema: GraphQLSchema = await monaco.languages.graphql.getSchema();
+        const schema: GraphQLSchema = await monaco.languages.graphql.api.getSchema();
         console.log('schema fetched');
         // @ts-ignore
         dispatch(schemaSucceededAction(buildSchemaFromResponse(schema)));
@@ -137,7 +137,7 @@ export function SchemaProvider({
   React.useEffect(() => {
     if (state.config) {
       // @ts-ignore
-      monaco.languages.graphql.graphqlDefaults.setSchemaConfig(state.config);
+      monaco.languages?.graphql?.graphqlDefaults.setSchemaConfig(state.config);
     }
     setTimeout(() => {
       loadCurrentSchema()

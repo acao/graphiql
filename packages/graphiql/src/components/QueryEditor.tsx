@@ -16,12 +16,9 @@ type QueryEditorProps = {
   readOnly?: boolean;
   onHintInformationRender: (elem: HTMLDivElement) => void;
   onClickReference?: (reference: GraphQLType) => void;
-  onCopyQuery?: () => void;
-  onPrettifyQuery?: () => void;
-  onMergeQuery?: () => void;
-  onRunQuery?: () => void;
   editorTheme?: string;
   operation?: string;
+  editorOptions?: monaco.editor.IStandaloneEditorConstructionOptions;
 };
 
 /**
@@ -64,6 +61,7 @@ export function QueryEditor(props: QueryEditorProps) {
         value: session?.operation?.text ?? '',
         language: 'graphqlDev',
         automaticLayout: true,
+        ...props.editorOptions,
       },
     ));
     if (!editor) {
@@ -74,11 +72,15 @@ export function QueryEditor(props: QueryEditorProps) {
       if (!ignoreChangeEvent) {
         cachedValueRef.current = editor.getValue();
         session.changeOperation(cachedValueRef.current);
+        props.onEdit && props.onEdit(cachedValueRef.current);
       }
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  /**
+   * Handle incoming changes via props (quasi-controlled component?)
+   */
   React.useEffect(() => {
     setIgnoreChangeEvent(true);
     const editor = editorRef.current;

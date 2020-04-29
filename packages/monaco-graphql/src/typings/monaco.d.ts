@@ -13,8 +13,11 @@ declare module monaco.languages.graphql {
     SchemaLoader,
     SchemaConfig as SchemaConfiguration,
   } from 'graphql-languageservice';
+
   import type { GraphQLSchema } from 'graphql';
   import type { Options as PrettierConfig } from 'prettier';
+
+  import { MonacoGraphQLApi } from '../api';
 
   export interface IDisposable {
     dispose(): void;
@@ -105,6 +108,8 @@ declare module monaco.languages.graphql {
     setFormattingOptions(formattingOptions: FormattingOptions): void;
     setModeConfiguration(modeConfiguration: ModeConfiguration): void;
   }
+
+  export interface api extends MonacoGraphQLApi {}
 
   // export const graphqlDefaults: LanguageServiceDefaults;
 }

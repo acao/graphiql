@@ -1,3 +1,4 @@
+/* global monaco */
 /**
  *  Copyright (c) 2020 GraphQL Contributors.
  *
@@ -17,7 +18,6 @@ import {
   formattingDefaults,
   modeConfigurationDefault,
 } from './defaults';
-
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 // @ts-ignore

@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import {
@@ -12,7 +13,7 @@ import EditorWorker from 'worker-loader!monaco-editor/esm/vs/editor/editor.worke
 // @ts-ignore
 import JSONWorker from 'worker-loader!monaco-editor/esm/vs/language/json/json.worker';
 // @ts-ignore
-import GraphQLWorker from 'worker-loader!monaco-graphql/esm/graphql.worker';
+import GraphQLWorker from 'worker-loader!../../workers/graphql.worker';
 
 // @ts-ignore
 window.MonacoEnvironment = {
