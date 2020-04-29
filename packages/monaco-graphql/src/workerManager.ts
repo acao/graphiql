@@ -5,7 +5,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import * as monaco from 'monaco-editor';
+import { editor as monacoEditor } from 'monaco-editor/esm/vs/editor/editor.api';
 import { LanguageServiceDefaultsImpl } from './defaults';
 import { GraphQLWorker } from './GraphQLWorker';
 
@@ -65,18 +65,16 @@ export class WorkerManager {
     this._lastUsedTime = Date.now();
 
     if (!this._client) {
-      this._worker = monaco.editor.createWebWorker<GraphQLWorker>({
+      this._worker = monacoEditor.createWebWorker<GraphQLWorker>({
         // module that exports the create() method and returns a `GraphQLWorker` instance
         moduleId: 'vs/language/graphql/graphqlWorker',
 
         label: this._defaults.languageId,
         // passed in to the create() method
         createData: {
-          languageSettings: this._defaults.diagnosticsOptions,
           languageId: this._defaults.languageId,
-          enableSchemaRequest: this._defaults.diagnosticsOptions
-            .enableSchemaRequest,
-          schemaUrl: this._defaults.diagnosticsOptions.schemaUri,
+          formattingOptions: this._defaults.formattingOptions,
+          schemaConfig: this._defaults.schemaConfig,
         },
       });
       try {

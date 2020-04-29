@@ -1,19 +1,6 @@
 import { OperationDefinitionNode } from 'graphql';
 
-import { Observable, Unsubscribable } from '../types';
-
-export type FetcherParams = {
-  query: string;
-  operationName?: string;
-  variables?: string;
-};
-
-export type FetcherResult = string;
-
-export type Fetcher = (
-  graphQLParams: FetcherParams,
-  schemaConfig: SchemaConfig,
-) => Promise<FetcherResult> | Observable<FetcherResult>;
+import { Unsubscribable } from '../types';
 
 export type File = {
   uri: string;
@@ -26,11 +13,6 @@ export type GraphQLParams = {
   query: string;
   variables?: string;
   operationName?: string;
-};
-
-export type SchemaConfig = {
-  uri: string;
-  assumeValid?: boolean;
 };
 
 export type EditorContexts = 'operation' | 'variables' | 'results';

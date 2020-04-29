@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Fetcher } from '../types';
+import { Fetcher } from '../../types';
 
 import { GraphQLParams, SessionState } from '../types';
 
-import { defaultFetcher } from '../common';
 import { SchemaContext } from './GraphiQLSchemaProvider';
 import { EditorContext } from './GraphiQLEditorsProvider';
 import {
@@ -114,14 +113,14 @@ const sessionReducer: SessionReducer = (state, action) => {
 
 export type SessionProviderProps = {
   sessionId: number;
-  fetcher?: Fetcher;
+  fetcher: Fetcher;
   session?: SessionState;
   children: React.ReactNode;
 };
 
 export function SessionProvider({
   sessionId,
-  fetcher = defaultFetcher,
+  fetcher,
   session,
   children,
 }: SessionProviderProps) {
@@ -167,9 +166,7 @@ export function SessionProvider({
         if (operationName) {
           fetchValues.operationName = operationName as string;
         }
-        const result = await observableToPromise(
-          fetcher(fetchValues, schemaState.config),
-        );
+        const result = await observableToPromise(fetcher(fetchValues));
         dispatch(operationSucceededAction(result, sessionId));
       } catch (err) {
         console.error(err.name, err.stack);

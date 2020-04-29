@@ -21,5 +21,13 @@
     "**/*-test.js",
     "**/*.stories.js",
     "**/*.stories.ts"
+  ],
+  "references": [
+    {
+      "path": "../monaco-graphql/tsconfig.esm.json"
+    },
+    {
+      "path": "../graphql-languageservice/tsconfig.esm.json"
+    }
   ]
 }

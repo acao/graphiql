@@ -12,6 +12,8 @@ import React, {
 } from 'react';
 import { GraphQLSchema, OperationDefinitionNode, GraphQLType } from 'graphql';
 
+import { SchemaConfig } from 'graphql-languageservice';
+
 import { ExecuteButton } from './ExecuteButton';
 import { ToolbarButton } from './ToolbarButton';
 import { QueryEditor } from './QueryEditor';
@@ -35,8 +37,8 @@ import {
   SessionProvider,
   SessionContext,
 } from '../api/providers/GraphiQLSessionProvider';
-import { Unsubscribable } from '../types';
-import { Fetcher } from '../api/types';
+import { getFetcher } from '../api/common';
+import { Unsubscribable, Fetcher } from '../types';
 
 const DEFAULT_DOC_EXPLORER_WIDTH = 350;
 
@@ -69,7 +71,9 @@ type Formatters = {
 };
 
 export type GraphiQLProps = {
-  fetcher: Fetcher;
+  uri: string;
+  fetcher?: Fetcher;
+  schemaConfig?: SchemaConfig;
   schema: GraphQLSchema | null;
   query?: string;
   variables?: string;
@@ -114,10 +118,16 @@ export type GraphiQLState = {
  * @see https://github.com/graphql/graphiql#usage
  */
 export const GraphiQL: React.FC<GraphiQLProps> = props => {
+  if (!props.fetcher && !props.uri) {
+    throw Error('fetcher or uri property are required');
+  }
+  const fetcher = getFetcher(props);
   return (
     <EditorsProvider>
-      <SchemaProvider {...props}>
-        <SessionProvider sessionId={0} {...props}>
+      <SchemaProvider
+        fetcher={fetcher}
+        config={{ uri: props.uri as string, ...props.schemaConfig }}>
+        <SessionProvider fetcher={fetcher} sessionId={0}>
           <GraphiQLInternals
             {...{
               formatResult,

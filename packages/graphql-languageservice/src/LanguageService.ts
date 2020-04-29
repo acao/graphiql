@@ -4,7 +4,7 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-import { parse, GraphQLSchema, ParseOptions } from 'graphql';
+import { parse, GraphQLSchema, ParseOptions, ValidationRule } from 'graphql';
 import type { Position } from 'graphql-language-service-types';
 import {
   getAutocompleteSuggestions,
@@ -12,59 +12,95 @@ import {
   getHoverInformation,
 } from 'graphql-language-service-interface';
 
-type LSPConfig = {
-  uri: string;
+import {
+  defaultSchemaLoader,
+  SchemaConfig,
+  SchemaResponse,
+  buildSchemaFromResponse,
+} from './schemaLoader';
+
+export type GraphQLLspConfig = {
   parser?: typeof parse;
   schemaLoader?: typeof defaultSchemaLoader;
+  schemaConfig: SchemaConfig;
 };
-import { defaultSchemaLoader } from './schemaLoader';
 
 export class LanguageService {
-  private _parser: typeof parse;
-  private _uri: string;
-  private _schema: GraphQLSchema | null;
-  private _schemaLoader: typeof defaultSchemaLoader;
+  private _parser: typeof parse = parse;
+  private _schema: GraphQLSchema | null = null;
+  private _schemaConfig: SchemaConfig;
+  private _schemaResponse: SchemaResponse | null = null;
+  private _schemaLoader: (
+    schemaConfig: SchemaConfig,
+  ) => Promise<SchemaResponse | void> = defaultSchemaLoader;
 
-  constructor({ uri, parser, schemaLoader }: LSPConfig) {
-    this._uri = uri;
-    this._parser = parser || parse;
-    this._schema = null;
-    this._schemaLoader = schemaLoader || defaultSchemaLoader;
+  constructor({ parser, schemaLoader, schemaConfig }: GraphQLLspConfig) {
+    this._schemaConfig = schemaConfig;
+    if (parser) {
+      this._parser = parser;
+    }
+    if (schemaLoader) {
+      this._schemaLoader = schemaLoader;
+    }
   }
 
   public get schema() {
     return this._schema as GraphQLSchema;
   }
 
-  async getSchema() {
+  public async getSchema() {
     if (this.schema) {
       return this.schema;
     }
     return this.loadSchema();
   }
 
-  async loadSchema() {
-    if (!this._uri) {
-      throw new Error('uri missing');
+  public async getSchemaResponse() {
+    if (this._schemaResponse) {
+      return this._schemaResponse;
     }
-    const schema = await this._schemaLoader({ uri: this._uri });
-    return schema as GraphQLSchema;
+    return this.loadSchemaResponse();
   }
 
-  async parse(text: string, options?: ParseOptions) {
+  public async loadSchemaResponse(): Promise<SchemaResponse> {
+    if (!this._schemaConfig?.uri) {
+      throw new Error('uri missing');
+    }
+    this._schemaResponse = (await this._schemaLoader(
+      this._schemaConfig,
+    )) as SchemaResponse;
+    return this._schemaResponse;
+  }
+
+  public async loadSchema() {
+    const schemaResponse = await this.loadSchemaResponse();
+    this._schema = buildSchemaFromResponse(
+      schemaResponse,
+      this._schemaConfig.buildSchemaOptions,
+    ) as GraphQLSchema;
+    return this._schema;
+  }
+
+  public async parse(text: string, options?: ParseOptions) {
     return this._parser(text, options);
   }
 
-  getCompletion = async (
+  public getCompletion = async (
     _uri: string,
     documentText: string,
     position: Position,
   ) =>
     getAutocompleteSuggestions(await this.getSchema(), documentText, position);
 
-  getDiagnostics = async (_uri: string, documentText: string) =>
-    getDiagnostics(documentText, await this.getSchema());
+  public getDiagnostics = async (
+    _uri: string,
+    documentText: string,
+    customRules?: ValidationRule[],
+  ) => getDiagnostics(documentText, await this.getSchema(), customRules);
 
-  getHover = async (_uri: string, documentText: string, position: Position) =>
-    getHoverInformation(await this.getSchema(), documentText, position);
+  public getHover = async (
+    _uri: string,
+    documentText: string,
+    position: Position,
+  ) => getHoverInformation(await this.getSchema(), documentText, position);
 }

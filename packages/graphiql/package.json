@@ -48,6 +48,7 @@
     "entities": "^2.0.0",
     "markdown-it": "^10.0.0",
     "monaco-graphql": "^2.3.4-alpha.4",
+    "graphql-languageservice": "^2.4.0-alpha.7",
     "monaco-editor": "^0.20.0",
     "regenerator-runtime": "^0.13.5",
     "theme-ui": "^0.3.1"

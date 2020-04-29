@@ -1,8 +1,6 @@
 import React, { useCallback } from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-// import 'monaco-graphql/esm/monaco.contribution';
-
 import {
   editorLoadedAction,
   EditorActionTypes,

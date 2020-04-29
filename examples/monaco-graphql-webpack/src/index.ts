@@ -1,8 +1,10 @@
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
+// eslint-disable-next-line spaced-comment
+/// <reference path='../../../node_modules/monaco-editor/monaco.d.ts'/>
+// eslint-disable-next-line spaced-comment
+/// <reference path='../../../packages/monaco-graphql/src/typings/monaco.d.ts'/>
 
 import 'regenerator-runtime/runtime';
 import 'monaco-graphql/esm/monaco.contribution';
-// / <reference path='monaco-graphql/esm/typings/monaco.d.ts'/>
 
 // NOTE: using loader syntax becuase Yaml worker imports editor.worker directly and that
 // import shouldn't go through loader syntax.
@@ -92,7 +94,6 @@ const operationEditor = monaco.editor.create(
   },
 );
 
-// @ts-ignore
 monaco.languages.graphql.graphqlDefaults.setSchemaUri(SCHEMA_URL);
 
 /**
@@ -113,6 +114,10 @@ async function executeCurrentOp() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
+
+    const schema = await monaco.languages.graphql.getSchema();
+    console.log({ schema: await schema });
+
     const resultText = await result.text();
     resultsEditor.setValue(JSON.stringify(JSON.parse(resultText), null, 2));
   } catch (err) {

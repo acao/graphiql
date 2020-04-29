@@ -5,8 +5,6 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import * as monaco from 'monaco-editor';
-
 import IRichLanguageConfiguration = monaco.languages.LanguageConfiguration;
 
 import { WorkerManager } from './workerManager';
@@ -23,18 +21,43 @@ export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
   const { languageId } = defaults;
   // client.getLanguageServiceWorker()
   disposables.push(client);
+  let uriList: Uri[] = [];
   const worker: languageFeatures.WorkerAccessor = (
     ...uris: Uri[]
   ): Promise<GraphQLWorker> => {
     try {
+      uriList = uris;
       return client.getLanguageServiceWorker(...uris);
     } catch (err) {
       throw Error('Error fetching graphql language service worker');
     }
   };
 
+  const getSchema = async () => {
+    try {
+      const langWorker = await worker(...uriList);
+      return langWorker.getSchemaResponse();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  // @ts-ignore
+  monaco.languages.graphql.getSchema = getSchema;
+
   monaco.languages.setLanguageConfiguration(languageId, richLanguageConfig);
   monaco.languages.setMonarchTokensProvider(languageId, monarchLanguage);
+
+  function registerFormattingProvider(): void {
+    const { modeConfiguration } = defaults;
+    if (modeConfiguration.documentFormattingEdits) {
+      providers.push(
+        monaco.languages.registerDocumentFormattingEditProvider(
+          defaults.languageId,
+          new languageFeatures.DocumentFormattingAdapter(worker),
+        ),
+      );
+    }
+  }
 
   function registerProviders(): void {
     const { modeConfiguration } = defaults;
@@ -60,30 +83,29 @@ export function setupMode(defaults: LanguageServiceDefaultsImpl): IDisposable {
       );
     }
 
-    if (modeConfiguration.documentFormattingEdits) {
-      providers.push(
-        monaco.languages.registerDocumentFormattingEditProvider(
-          defaults.languageId,
-          new languageFeatures.DocumentFormattingAdapter(worker),
-        ),
-      );
-    }
+    registerFormattingProvider();
   }
+
   registerProviders();
 
-  let modeConfiguration = defaults.modeConfiguration;
+  let { modeConfiguration, schemaConfig, formattingOptions } = defaults;
 
-  // when schema, etc changes
-  defaults.onDidChange(
-    // @ts-ignore
-    (newDefaults: monaco.languages.graphql.LanguageServiceDefaultsImpl) => {
-      if (newDefaults.modeConfiguration !== modeConfiguration) {
-        modeConfiguration = newDefaults.modeConfiguration;
-        registerProviders();
-      }
-    },
-  );
-
+  defaults.onDidChange(newDefaults => {
+    console.log({ newDefaults });
+    if (newDefaults.modeConfiguration !== modeConfiguration) {
+      modeConfiguration = newDefaults.modeConfiguration;
+      registerProviders();
+    }
+    if (newDefaults.schemaConfig !== schemaConfig) {
+      console.log('new schema opts');
+      schemaConfig = newDefaults.schemaConfig;
+      registerProviders();
+    }
+    if (newDefaults.formattingOptions !== formattingOptions) {
+      formattingOptions = newDefaults.formattingOptions;
+      registerFormattingProvider();
+    }
+  });
   disposables.push(asDisposable(providers));
 
   return asDisposable(disposables);

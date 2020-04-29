@@ -17,7 +17,7 @@ const resultConfig = {
   mode: process.env.NODE_ENV,
   entry: {
     graphiql: './cdn.ts',
-    'graphql.worker': 'monaco-graphql/esm/graphql.worker',
+    'graphql.worker': './workers/graphql.worker.ts',
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     'json.worker': 'monaco-editor/esm/vs/language/json/json.worker.js',
   },

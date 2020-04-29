@@ -64,7 +64,6 @@ export function QueryEditor(props: QueryEditorProps) {
         value: session?.operation?.text ?? '',
         language: 'graphqlDev',
         automaticLayout: true,
-        minimap: { enabled: false },
       },
     ));
     if (!editor) {

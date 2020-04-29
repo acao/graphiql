@@ -39,6 +39,23 @@ export type Observable<T> = {
   ): Unsubscribable;
 };
 
+export type SchemaConfig = {
+  uri: string;
+  assumeValid?: boolean;
+};
+
+export type FetcherParams = {
+  query: string;
+  operationName?: string;
+  variables?: string;
+};
+
+export type FetcherResult = string;
+
+export type Fetcher = (
+  graphQLParams: FetcherParams,
+) => Promise<FetcherResult> | Observable<FetcherResult>;
+
 export type ReactNodeLike =
   | {}
   | ReactElementLike

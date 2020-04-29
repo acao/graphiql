@@ -23,5 +23,13 @@
     "**/*.stories.js",
     "**/*.stories.ts",
     "**/*.stories.tsx"
+  ],
+  "references": [
+    {
+      "path": "../monaco-graphql"
+    },
+    {
+      "path": "../graphql-languageservice"
+    }
   ]
 }

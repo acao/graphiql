@@ -222,7 +222,6 @@ function getSuggestionsForFieldNames(
     if (parentType === schema.getQueryType()) {
       fields.push(SchemaMetaFieldDef, TypeMetaFieldDef);
     }
-    console.log({ fields });
     return hintList(
       token,
       fields.map<CompletionItem>((field, index) => ({

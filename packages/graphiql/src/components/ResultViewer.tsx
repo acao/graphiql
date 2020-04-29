@@ -16,7 +16,7 @@ type ResultViewerProps = {
   editorTheme?: string;
 };
 
-export function ResultViewer(_props: ResultViewerProps) {
+export function ResultViewer(props: ResultViewerProps) {
   const divRef = React.useRef<HTMLElement | null>(null);
   const viewerRef = React.useRef<monaco.editor.IStandaloneCodeEditor>();
   const session = useSessionContext();
@@ -30,6 +30,7 @@ export function ResultViewer(_props: ResultViewerProps) {
       readOnly: true,
       language: 'json',
       automaticLayout: true,
+      theme: props.editorTheme,
     });
     loadEditor('results', viewerRef.current);
 

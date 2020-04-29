@@ -1,7 +1,11 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { GraphQLSchema } from 'graphql';
-import { defaultSchemaLoader } from '../common';
-import { SchemaConfig } from '../types';
+import { SchemaConfig, Fetcher } from '../../types';
+
+import { buildSchemaFromResponse } from 'graphql-languageservice';
+
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+
 import {
   SchemaAction,
   SchemaActionTypes,
@@ -23,17 +27,9 @@ export type SchemaState = {
 
 export type SchemaReducer = React.Reducer<SchemaState, SchemaAction>;
 
-const isDev = window.location.hostname === 'localhost';
-
-const uri = isDev
-  ? 'http://localhost:8080/graphql'
-  : 'https://swapi-graphql.netlify.app/.netlify/functions/index';
-
 export const initialReducerState: SchemaState = {
   isLoading: false,
-  config: {
-    uri,
-  },
+  config: { uri: '' },
   schema: null,
   errors: null,
 };
@@ -54,9 +50,7 @@ export type SchemaContextValue = SchemaState & ProjectHandlers;
 export const SchemaContext = React.createContext<SchemaContextValue>({
   ...getInitialState(),
   loadCurrentSchema: async () => undefined,
-  // loadSchema: async () => undefined,
   dispatch: async () => undefined,
-  schemaLoader: defaultSchemaLoader,
 });
 
 export const useSchemaContext = () => React.useContext(SchemaContext);
@@ -104,20 +98,18 @@ export const schemaReducer: SchemaReducer = (state, action): SchemaState => {
 
 export type SchemaProviderProps = {
   config?: SchemaConfig;
-  schemaLoader?: typeof defaultSchemaLoader;
   children?: any;
+  fetcher: Fetcher;
 };
 
 export type ProjectHandlers = {
-  // loadSchema: (state: SchemaState, config: SchemaConfig) => Promise<void>;
   loadCurrentSchema: (state: SchemaState) => Promise<void>;
-  schemaLoader: typeof defaultSchemaLoader;
   dispatch: React.Dispatch<SchemaAction>;
 };
 
 export function SchemaProvider({
-  schemaLoader = defaultSchemaLoader,
   config: userSchemaConfig = initialReducerState.config,
+  fetcher,
   ...props
 }: SchemaProviderProps) {
   const [state, dispatch] = React.useReducer<SchemaReducer>(
@@ -128,24 +120,38 @@ export function SchemaProvider({
   const loadCurrentSchema = useCallback(async () => {
     dispatch(schemaRequestedAction());
     try {
-      const schema = await schemaLoader(state.config);
-      if (schema) {
-        dispatch(schemaSucceededAction(schema));
+      // @ts-ignore
+      if (monaco.languages.graphql.getSchema) {
+        // @ts-ignore
+        const schema: GraphQLSchema = await monaco.languages.graphql.getSchema();
+        console.log('schema fetched');
+        // @ts-ignore
+        dispatch(schemaSucceededAction(buildSchemaFromResponse(schema)));
       }
     } catch (error) {
+      console.error(error);
       dispatch(schemaErroredAction(error));
     }
-  }, [dispatch, schemaLoader, state.config]);
+  }, [dispatch]);
 
-  useEffect(() => {
-    loadCurrentSchema();
-  }, [loadCurrentSchema]);
+  React.useEffect(() => {
+    if (state.config) {
+      // @ts-ignore
+      monaco.languages.graphql.graphqlDefaults.setSchemaConfig(state.config);
+    }
+    setTimeout(() => {
+      loadCurrentSchema()
+        .then(() => {
+          console.log('completed');
+        })
+        .catch(err => console.error(err));
+    }, 200);
+  }, [state.config, loadCurrentSchema]);
 
   return (
     <SchemaContext.Provider
       value={{
         ...state,
-        schemaLoader,
         loadCurrentSchema,
         dispatch,
       }}>

@@ -69,6 +69,8 @@ function updateURL() {
   history.replaceState(null, null, newSearch);
 }
 
+const api = 'https://swapi-graphql.netlify.app/.netlify/functions/index';
+
 // Defines a GraphQL fetcher using the fetch API. You're not required to
 // use fetch, and could instead implement graphQLFetcher however you like,
 // as long as it returns a Promise or Observable.
@@ -80,7 +82,6 @@ function graphQLFetcher(graphQLParams) {
   // const api = isDev
   //   ? '/graphql'
   //   : 'https://swapi-graphql.netlify.app/.netlify/functions/index';
-  const api = 'https://swapi-graphql.netlify.app/.netlify/functions/index';
 
   return fetch(api, {
     method: 'post',
@@ -108,6 +109,7 @@ function graphQLFetcher(graphQLParams) {
 // additional child elements.
 ReactDOM.render(
   React.createElement(GraphiQL, {
+    uri: api,
     fetcher: graphQLFetcher,
     query: parameters.query,
     variables: parameters.variables,

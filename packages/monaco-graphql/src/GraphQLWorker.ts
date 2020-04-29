@@ -4,18 +4,20 @@
  *  This source code is licensed under the MIT license found in the
  *  LICENSE file in the root directory of this source tree.
  */
-import type {
-  worker,
-  editor,
-  languages,
-  Position,
-  IRange,
-} from 'monaco-editor';
+
+// eslint-disable-next-line spaced-comment
+/// <reference path='../../../node_modules/monaco-editor/monaco.d.ts'/>
+// eslint-disable-next-line spaced-comment
+/// <reference path='../../../packages/monaco-graphql/src/typings/monaco.d.ts'/>
+
+import type { worker, editor, Position, IRange } from 'monaco-editor';
 
 import {
   getRange,
   CompletionItem as GraphQLCompletionItem,
   LanguageService,
+  GraphQLLspConfig,
+  SchemaResponse,
 } from 'graphql-languageservice';
 
 import {
@@ -25,7 +27,9 @@ import {
   toCompletion,
 } from './utils';
 
-export type MonacoCompletionItem = languages.CompletionItem & {
+import { GraphQLSchema } from 'graphql';
+
+export type MonacoCompletionItem = monaco.languages.CompletionItem & {
   isDeprecated?: boolean;
   deprecationReason?: string | null;
 };
@@ -33,14 +37,28 @@ export type MonacoCompletionItem = languages.CompletionItem & {
 export class GraphQLWorker {
   private _ctx: worker.IWorkerContext;
   private _languageService: LanguageService;
+  private _formattingOptions:
+    | monaco.languages.graphql.FormattingOptions
+    | undefined;
   constructor(
     ctx: worker.IWorkerContext,
     createData: monaco.languages.graphql.ICreateData,
   ) {
     this._ctx = ctx;
-    this._languageService = new LanguageService({ uri: createData.schemaUrl });
+    const serviceConfig: GraphQLLspConfig = {
+      schemaConfig: createData.schemaConfig,
+    };
+    // if you must, we have a nice default schema loader at home
+    if (createData.schemaLoader) {
+      serviceConfig.schemaLoader = createData.schemaLoader;
+    }
+    this._languageService = new LanguageService(serviceConfig);
+    this._formattingOptions = createData.formattingOptions;
   }
-  async getSchema() {
+  async getSchemaResponse(_uri?: string): Promise<SchemaResponse> {
+    return this._languageService.getSchemaResponse();
+  }
+  async loadSchema(_uri?: string): Promise<GraphQLSchema> {
     return this._languageService.getSchema();
   }
   async doValidation(uri: string): Promise<editor.IMarkerData[]> {
@@ -107,6 +125,7 @@ export class GraphQLWorker {
     const prettierGraphqlParser = await import('prettier/parser-graphql');
 
     return prettierStandalone.format(text, {
+      ...this._formattingOptions,
       parser: 'graphql',
       plugins: [prettierGraphqlParser],
     });
