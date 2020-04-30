@@ -126,7 +126,7 @@ export const GraphiQL: React.FC<GraphiQLProps> = props => {
     <EditorsProvider>
       <SchemaProvider
         fetcher={fetcher}
-        config={{ uri: props.uri as string, ...props.schemaConfig }}>
+        config={{ uri: props.uri, ...props.schemaConfig }}>
         <SessionProvider fetcher={fetcher} sessionId={0}>
           <GraphiQLInternals
             {...{
