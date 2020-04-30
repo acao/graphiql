@@ -45,6 +45,9 @@ export function VariableEditor(props: VariableEditorProps) {
   const divRef = React.useRef<HTMLDivElement>(null);
   const { loadEditor } = useEditorsContext();
 
+  const propsRef = useValueRef(props);
+  const sessionRef = useValueRef(session);
+
   React.useEffect(() => {
     // Lazily require to ensure requiring GraphiQL outside of a Browser context
     // does not produce an error.
@@ -78,8 +81,8 @@ export function VariableEditor(props: VariableEditorProps) {
 
     editor.onDidChangeModelContent(() => {
       if (!ignoreChangeEvent) {
-        cachedValueRef.current = editor.getValue();
-        session.changeVariables(cachedValueRef.current);
+        cachedValueRef.current = editorRef.current.getValue();
+        sessionRef.current.changeVariables(cachedValueRef.current);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +105,7 @@ export function VariableEditor(props: VariableEditorProps) {
     }
 
     setIgnoreChangeEvent(false);
-  }, [session.variables.text]);
+  }, [session.variables.text, editorRef.current]);
 
   React.useEffect(() => {
     const editor = editorRef.current;
@@ -113,7 +116,7 @@ export function VariableEditor(props: VariableEditorProps) {
       // editor.options.lint.variableToType = queryFacts.variableToType;
       // editor.options.hintOptions.variableToType = queryFacts.variableToType;
     }
-  }, [queryFacts, queryFacts?.variableToType]);
+  }, [queryFacts, queryFacts.variableToType]);
 
   return <div className="codemirrorWrap variables-editor" ref={divRef} />;
 }
