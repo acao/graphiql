@@ -19,8 +19,6 @@ export type VariableEditorProps = {
   value?: string;
   readOnly?: boolean;
   onHintInformationRender: (value: HTMLDivElement) => void;
-  onPrettifyQuery: (value?: string) => void;
-  onMergeQuery: (value?: string) => void;
   editorTheme?: string;
   editorOptions?: EditorOptions;
 };

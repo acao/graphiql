@@ -12,7 +12,7 @@ import React, {
 } from 'react';
 import { GraphQLSchema, OperationDefinitionNode, GraphQLType } from 'graphql';
 
-import { SchemaConfig } from 'graphql-languageservice';
+import type { SchemaConfig } from 'graphql-languageservice';
 
 import { ExecuteButton } from './ExecuteButton';
 import { ToolbarButton } from './ToolbarButton';
@@ -283,7 +283,9 @@ class GraphiQLInternals extends React.Component<
     ) || (
       <GraphiQLToolbar>
         <ToolbarButton
-          onClick={this.handlePrettifyQuery}
+          onClick={() => {
+            return;
+          }}
           title="Prettify Query (Shift-Ctrl-P)"
           label="Prettify"
         />
@@ -412,8 +414,6 @@ class GraphiQLInternals extends React.Component<
                 </div>
                 <VariableEditor
                   onHintInformationRender={this.handleHintInformationRender}
-                  onPrettifyQuery={this.handlePrettifyQuery}
-                  onMergeQuery={this.handleMergeQuery}
                   editorTheme={this.props.editorTheme}
                   readOnly={this.props.readOnly}
                   editorOptions={this.props.variablesEditorOptions}
@@ -524,29 +524,6 @@ class GraphiQLInternals extends React.Component<
     if (subscription) {
       subscription.unsubscribe();
     }
-  };
-
-  handlePrettifyQuery = () => {
-    // const editor = this.getQueryEditor();
-    // const editorContent = editor?.getValue() ?? '';
-    // const prettifiedEditorContent = print(parse(editorContent));
-    // if (prettifiedEditorContent !== editorContent) {
-    //   editor?.setValue(prettifiedEditorContent);
-    // }
-    // const variableEditor = this.getVariableEditor();
-    // const variableEditorContent = variableEditor?.getValue() ?? '';
-    // try {
-    //   const prettifiedVariableEditorContent = JSON.stringify(
-    //     JSON.parse(variableEditorContent),
-    //     null,
-    //     2,
-    //   );
-    //   if (prettifiedVariableEditorContent !== variableEditorContent) {
-    //     variableEditor?.setValue(prettifiedVariableEditorContent);
-    //   }
-    // } catch {
-    //   /* Parsing JSON failed, skip prettification */
-    // }
   };
 
   handleMergeQuery = () => {

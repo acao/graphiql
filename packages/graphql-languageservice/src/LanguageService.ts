@@ -20,9 +20,9 @@ import {
 } from './schemaLoader';
 
 export type GraphQLLspConfig = {
+  schemaConfig: SchemaConfig;
   parser?: typeof parse;
   schemaLoader?: typeof defaultSchemaLoader;
-  schemaConfig: SchemaConfig;
 };
 
 export class LanguageService {
