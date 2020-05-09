@@ -1,0 +1,10 @@
+{
+  "extends": "../../resources/tsconfig.base.cjs.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true
+  },
+  "include": ["src"],
+  "exclude": ["**/__tests__/**", "**/*.spec.*"]
+}

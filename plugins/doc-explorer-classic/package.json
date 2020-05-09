@@ -1,0 +1,19 @@
+{
+  "name": "@graphiql-plugins/doc-explorer-classic",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "description": "The classic, visual schema doc explorer for GraphQL",
+  "author": {
+    "name": "GraphiQL Contributors"
+  },
+  "main": "dist/index.js",
+  "module": "esm/index.js",
+  "typings": "esm/index.d.ts",
+  "scripts": {},
+  "peerDependencies": {
+    "react": ">= 16.13.1",
+    "graphql": ">= 15.0.0"
+  },
+  "devDependencies": {}
+}

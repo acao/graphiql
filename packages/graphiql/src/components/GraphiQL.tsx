@@ -5,7 +5,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import React, { ComponentType, PropsWithChildren } from 'react';
+import React, { ComponentType, PropsWithChildren, useState } from 'react';
 import { GraphQLSchema, OperationDefinitionNode, GraphQLType } from 'graphql';
 
 import { SchemaConfig } from 'graphql-languageservice';
@@ -15,7 +15,7 @@ import { ToolbarButton } from './ToolbarButton';
 import { QueryEditor } from './QueryEditor';
 import { VariableEditor } from './VariableEditor';
 import { ResultViewer } from './ResultViewer';
-import { DocExplorer } from './DocExplorer';
+import { plugin as DocExplorerPlugin } from '@graphiql-plugins/doc-explorer-classic';
 import { QueryHistory } from './QueryHistory';
 import StorageAPI, { Storage } from '../utility/StorageAPI';
 import { VariableToType } from '../utility/getQueryFacts';
@@ -23,18 +23,16 @@ import { VariableToType } from '../utility/getQueryFacts';
 import find from '../utility/find';
 import { GetDefaultFieldNamesFn, fillLeafs } from '../utility/fillLeafs';
 
-import {
-  SchemaProvider,
-  SchemaContext,
-} from '../api/providers/GraphiQLSchemaProvider';
+import { SchemaProvider } from '../api/providers/GraphiQLSchemaProvider';
 import { EditorsProvider } from '../api/providers/GraphiQLEditorsProvider';
 import {
   SessionProvider,
   SessionContext,
 } from '../api/providers/GraphiQLSessionProvider';
 import { getFetcher } from '../api/common';
-import { Unsubscribable, Fetcher } from '../types';
-import { Provider, useThemeLayout } from '../new-components/themes/provider';
+import { Unsubscribable, Fetcher, ReactNodeLike } from '../types';
+import { Provider, useThemeLayout } from './common/themes/provider';
+import Tabs from './common/Toolbar/Tabs';
 
 const DEFAULT_DOC_EXPLORER_WIDTH = 350;
 
@@ -171,7 +169,6 @@ class GraphiQLInternals extends React.Component<
   _editorQueryID = 0;
   _storage: StorageAPI;
   // refs
-  docExplorerComponent: Maybe<DocExplorer>;
   graphiqlContainer: Maybe<HTMLDivElement>;
   resultComponent: Maybe<typeof ResultViewer>;
   variableEditorComponent: Maybe<typeof VariableEditor>;
@@ -291,6 +288,22 @@ class GraphiQLInternals extends React.Component<
     //   height: variableOpen ? this.state.variableEditorHeight : undefined,
     // };
 
+    // eslint-disable-next-line no-shadow
+    const SessionTabs = ({
+      tabs,
+      children: c,
+    }: {
+      tabs: Array<ReactNodeLike>;
+      children: Array<ReactNodeLike>;
+    }) => {
+      const [active, setActive] = useState(0);
+      return (
+        <Tabs active={active} tabs={tabs} onChange={setActive}>
+          {c}
+        </Tabs>
+      );
+    };
+
     const operationEditor = (
       // <div
       //   ref={n => {
@@ -300,56 +313,55 @@ class GraphiQLInternals extends React.Component<
       //   onDoubleClick={this.handleResetResize}
       //   onMouseDown={this.handleResizeStart}>
       //   <div className="queryWrap" style={queryWrapStyle}>
-      <QueryEditor
-        onHintInformationRender={this.handleHintInformationRender}
-        onClickReference={this.handleClickReference}
-        editorTheme={this.props.editorTheme}
-        readOnly={this.props.readOnly}
-        editorOptions={this.props.operationEditorOptions}
-      />
-      //   </div>
-      // </div>
+      <section>
+        <SessionTabs tabs={[`Operation`, `Explorer`]}>
+          <QueryEditor
+            onHintInformationRender={this.handleHintInformationRender}
+            onClickReference={this.handleClickReference}
+            editorTheme={this.props.editorTheme}
+            readOnly={this.props.readOnly}
+            editorOptions={this.props.operationEditorOptions}
+          />
+          <div>{`Explorer`}</div>
+        </SessionTabs>
+      </section>
     );
 
     const variables = (
-      <section
-        className="variable-editor"
-        // style={variableStyle}
-        aria-label="Query Variables">
-        <div
-          className="variable-editor-title"
-          id="variable-editor-title"
-          // style={{
-          //   cursor: variableOpen ? 'row-resize' : 'n-resize',
-          // }}
-          // onMouseDown={this.handleVariableResizeStart}
-        >
-          {'Query Variables'}
-        </div>
-        <VariableEditor
-          onHintInformationRender={this.handleHintInformationRender}
-          onPrettifyQuery={this.handlePrettifyQuery}
-          onMergeQuery={this.handleMergeQuery}
-          editorTheme={this.props.editorTheme}
-          readOnly={this.props.readOnly}
-          editorOptions={this.props.variablesEditorOptions}
-        />
+      <section aria-label="Query Variables">
+        <SessionTabs tabs={[`Variables`, `Console`]}>
+          <VariableEditor
+            onHintInformationRender={this.handleHintInformationRender}
+            onPrettifyQuery={this.handlePrettifyQuery}
+            onMergeQuery={this.handleMergeQuery}
+            editorTheme={this.props.editorTheme}
+            readOnly={this.props.readOnly}
+            editorOptions={this.props.variablesEditorOptions}
+          />
+          <div>{`Console`}</div>
+        </SessionTabs>
       </section>
     );
 
     const response = (
-      <div className="resultWrap">
-        {this.state.isWaitingForResponse && (
-          <div className="spinner-container">
-            <div className="spinner" />
-          </div>
-        )}
-        <ResultViewer
-          editorTheme={this.props.editorTheme}
-          editorOptions={this.props.resultsEditorOptions}
-        />
-        {footer}
-      </div>
+      <section aria-label="Response Editor">
+        <SessionTabs tabs={[`Response`, `Extensions`, `Playground`]}>
+          <>
+            {this.state.isWaitingForResponse && (
+              <div className="spinner-container">
+                <div className="spinner" />
+              </div>
+            )}
+            <ResultViewer
+              editorTheme={this.props.editorTheme}
+              editorOptions={this.props.resultsEditorOptions}
+            />
+            {footer}
+          </>
+          <div>{`Extensions`}</div>
+          <div>{`Playground`}</div>
+        </SessionTabs>
+      </section>
     );
 
     return (
@@ -391,7 +403,7 @@ class GraphiQLInternals extends React.Component<
               </GraphiQLToolbar>
             </>
           }
-          explorer={{
+          session={{
             input: operationEditor,
             response,
             console: variables,
@@ -402,22 +414,7 @@ class GraphiQLInternals extends React.Component<
                   {
                     key: 'docs',
                     size: 'sidebar' as const,
-                    component: (
-                      <SchemaContext.Consumer>
-                        {({ schema }) => {
-                          return (
-                            <DocExplorer schema={schema}>
-                              <button
-                                className="docExplorerHide"
-                                onClick={this.handleToggleDocs}
-                                aria-label="Close Documentation Explorer">
-                                {'\u2715'}
-                              </button>
-                            </DocExplorer>
-                          );
-                        }}
-                      </SchemaContext.Consumer>
-                    ),
+                    component: DocExplorerPlugin.sidebarTabs[0].component,
                   },
                 ]
               : []),
@@ -431,16 +428,12 @@ class GraphiQLInternals extends React.Component<
                         {session => {
                           return (
                             <QueryHistory
-                              onSelectQuery={(
-                                operation,
-                                variables,
-                                _opName,
-                              ) => {
+                              onSelectQuery={(operation, vars, _opName) => {
                                 if (operation) {
                                   session.changeOperation(operation);
                                 }
-                                if (variables) {
-                                  session.changeVariables(variables);
+                                if (vars) {
+                                  session.changeVariables(vars);
                                 }
                               }}
                               storage={this._storage}
@@ -511,12 +504,12 @@ class GraphiQLInternals extends React.Component<
     return result;
   }
 
-  handleClickReference = (reference: GraphQLType) => {
-    this.setState({ docExplorerOpen: true }, () => {
-      if (this.docExplorerComponent) {
-        this.docExplorerComponent.showDocForReference(reference);
-      }
-    });
+  handleClickReference = (_reference: GraphQLType) => {
+    // this.setState({ docExplorerOpen: true }, () => {
+    //   if (this.docExplorerComponent) {
+    //     this.docExplorerComponent.showDocForReference(reference);
+    //   }
+    // });
   };
 
   handleStopQuery = () => {
@@ -606,11 +599,11 @@ class GraphiQLInternals extends React.Component<
       if (schema) {
         const type = schema.getType(typeName);
         if (type) {
-          this.setState({ docExplorerOpen: true }, () => {
-            if (this.docExplorerComponent) {
-              this.docExplorerComponent.showDoc(type);
-            }
-          });
+          // this.setState({ docExplorerOpen: true }, () => {
+          //   if (this.docExplorerComponent) {
+          //     this.docExplorerComponent.showDoc(type);
+          //   }
+          // });
         }
       }
     }
