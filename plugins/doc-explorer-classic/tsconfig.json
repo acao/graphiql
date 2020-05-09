@@ -1,0 +1,17 @@
+{
+  "extends": "../../resources/tsconfig.base.cjs.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "target": "es5",
+    "strictPropertyInitialization": false,
+    "paths": {
+      "src/*": ["*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["**/__tests__/**", "**/*.spec.*"]
+}

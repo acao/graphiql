@@ -33,7 +33,7 @@ export type TabsProps = {
   tabs: ReactNodeLike[];
   active: number;
   onChange?: (idx: number) => void;
-  children: ReactNodeLike[];
+  children?: ReactNodeLike[];
 };
 
 const Tabs = ({ tabs, active, onChange, children }: TabsProps) => {
@@ -49,7 +49,7 @@ const Tabs = ({ tabs, active, onChange, children }: TabsProps) => {
           </Tab>
         ))}
       </WithDividers>
-      {children[active]}
+      {children && children[active]}
     </React.Fragment>
   );
 };

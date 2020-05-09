@@ -5,7 +5,7 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-import React, { ComponentType, PropsWithChildren } from 'react';
+import React, { ComponentType, PropsWithChildren, useState } from 'react';
 import { GraphQLSchema, OperationDefinitionNode, GraphQLType } from 'graphql';
 
 import { SchemaConfig } from 'graphql-languageservice';
@@ -15,7 +15,7 @@ import { ToolbarButton } from './ToolbarButton';
 import { QueryEditor } from './QueryEditor';
 import { VariableEditor } from './VariableEditor';
 import { ResultViewer } from './ResultViewer';
-import { DocExplorer } from './DocExplorer';
+import { plugin as DocExplorerPlugin } from '@graphiql-plugins/doc-explorer-classic';
 import { QueryHistory } from './QueryHistory';
 import StorageAPI, { Storage } from '../utility/StorageAPI';
 import { VariableToType } from '../utility/getQueryFacts';
@@ -23,10 +23,7 @@ import { VariableToType } from '../utility/getQueryFacts';
 import find from '../utility/find';
 import { GetDefaultFieldNamesFn, fillLeafs } from '../utility/fillLeafs';
 
-import {
-  SchemaProvider,
-  SchemaContext,
-} from '../api/providers/GraphiQLSchemaProvider';
+import { SchemaProvider } from '../api/providers/GraphiQLSchemaProvider';
 import { EditorsProvider } from '../api/providers/GraphiQLEditorsProvider';
 import {
   SessionProvider,
@@ -172,7 +169,6 @@ class GraphiQLInternals extends React.Component<
   _editorQueryID = 0;
   _storage: StorageAPI;
   // refs
-  docExplorerComponent: Maybe<DocExplorer>;
   graphiqlContainer: Maybe<HTMLDivElement>;
   resultComponent: Maybe<typeof ResultViewer>;
   variableEditorComponent: Maybe<typeof VariableEditor>;
@@ -295,7 +291,7 @@ class GraphiQLInternals extends React.Component<
     // eslint-disable-next-line no-shadow
     const SessionTabs = ({
       tabs,
-      children,
+      children: c,
     }: {
       tabs: Array<ReactNodeLike>;
       children: Array<ReactNodeLike>;
@@ -303,7 +299,7 @@ class GraphiQLInternals extends React.Component<
       const [active, setActive] = useState(0);
       return (
         <Tabs active={active} tabs={tabs} onChange={setActive}>
-          {children}
+          {c}
         </Tabs>
       );
     };
@@ -329,8 +325,6 @@ class GraphiQLInternals extends React.Component<
           <div>{`Explorer`}</div>
         </SessionTabs>
       </section>
-      //   </div>
-      // </div>
     );
 
     const variables = (
@@ -409,7 +403,7 @@ class GraphiQLInternals extends React.Component<
               </GraphiQLToolbar>
             </>
           }
-          explorer={{
+          session={{
             input: operationEditor,
             response,
             console: variables,
@@ -420,22 +414,7 @@ class GraphiQLInternals extends React.Component<
                   {
                     key: 'docs',
                     size: 'sidebar' as const,
-                    component: (
-                      <SchemaContext.Consumer>
-                        {({ schema }) => {
-                          return (
-                            <DocExplorer schema={schema}>
-                              <button
-                                className="docExplorerHide"
-                                onClick={this.handleToggleDocs}
-                                aria-label="Close Documentation Explorer">
-                                {'\u2715'}
-                              </button>
-                            </DocExplorer>
-                          );
-                        }}
-                      </SchemaContext.Consumer>
-                    ),
+                    component: DocExplorerPlugin.sidebarTabs[0].component,
                   },
                 ]
               : []),
@@ -449,16 +428,12 @@ class GraphiQLInternals extends React.Component<
                         {session => {
                           return (
                             <QueryHistory
-                              onSelectQuery={(
-                                operation,
-                                variables,
-                                _opName,
-                              ) => {
+                              onSelectQuery={(operation, vars, _opName) => {
                                 if (operation) {
                                   session.changeOperation(operation);
                                 }
-                                if (variables) {
-                                  session.changeVariables(variables);
+                                if (vars) {
+                                  session.changeVariables(vars);
                                 }
                               }}
                               storage={this._storage}
@@ -529,12 +504,12 @@ class GraphiQLInternals extends React.Component<
     return result;
   }
 
-  handleClickReference = (reference: GraphQLType) => {
-    this.setState({ docExplorerOpen: true }, () => {
-      if (this.docExplorerComponent) {
-        this.docExplorerComponent.showDocForReference(reference);
-      }
-    });
+  handleClickReference = (_reference: GraphQLType) => {
+    // this.setState({ docExplorerOpen: true }, () => {
+    //   if (this.docExplorerComponent) {
+    //     this.docExplorerComponent.showDocForReference(reference);
+    //   }
+    // });
   };
 
   handleStopQuery = () => {
@@ -624,11 +599,11 @@ class GraphiQLInternals extends React.Component<
       if (schema) {
         const type = schema.getType(typeName);
         if (type) {
-          this.setState({ docExplorerOpen: true }, () => {
-            if (this.docExplorerComponent) {
-              this.docExplorerComponent.showDoc(type);
-            }
-          });
+          // this.setState({ docExplorerOpen: true }, () => {
+          //   if (this.docExplorerComponent) {
+          //     this.docExplorerComponent.showDoc(type);
+          //   }
+          // });
         }
       }
     }

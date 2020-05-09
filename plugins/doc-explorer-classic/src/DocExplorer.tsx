@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { GraphQLSchema, isType, GraphQLNamedType } from 'graphql';
-import { FieldType } from './DocExplorer/types';
+import { FieldType } from './types';
 
-import FieldDoc from './DocExplorer/FieldDoc';
-import SchemaDoc from './DocExplorer/SchemaDoc';
-import SearchBox from './DocExplorer/SearchBox';
-import SearchResults from './DocExplorer/SearchResults';
-import TypeDoc from './DocExplorer/TypeDoc';
+import FieldDoc from './FieldDoc';
+import SchemaDoc from './SchemaDoc';
+import SearchBox from './SearchBox';
+import SearchResults from './SearchResults';
+import TypeDoc from './TypeDoc';
 
 type NavStackItem = {
   name: string;

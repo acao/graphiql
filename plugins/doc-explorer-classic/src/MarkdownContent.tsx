@@ -7,7 +7,7 @@
 
 import React from 'react';
 import MD from 'markdown-it';
-import { Maybe } from '../../types';
+import { Maybe } from 'graphiql/esm/types';
 
 const md = new MD();
 

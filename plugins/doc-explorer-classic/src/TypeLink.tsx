@@ -14,7 +14,7 @@ import {
 } from 'graphql';
 import { OnClickTypeFunction } from './types';
 
-import { Maybe } from '../../types';
+import { Maybe } from 'graphiql/esm/types';
 
 type TypeLinkProps = {
   type?: Maybe<GraphQLType>;

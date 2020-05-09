@@ -1,0 +1,15 @@
+{
+  "name": "@graphiql-plugins/query-history-classic",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "description": "The classic doc explorer for GraphQL",
+  "author": {
+    "name": "GraphQL Contributors"
+  },
+  "scripts": {},
+  "peerDependencies": {
+    "react": ">= 16.13.1"
+  },
+  "devDependencies": {}
+}
