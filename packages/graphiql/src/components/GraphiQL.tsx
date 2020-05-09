@@ -34,8 +34,6 @@ import { Unsubscribable, Fetcher, ReactNodeLike } from '../types';
 import { Provider, useThemeLayout } from './common/themes/provider';
 import Tabs from './common/Toolbar/Tabs';
 
-const DocExplorerGraphiQL = docExplorerPlugin.sidebarTabs[0].component;
-
 const DEFAULT_DOC_EXPLORER_WIDTH = 350;
 
 const majorVersion = parseInt(React.version.slice(0, 2), 10);
@@ -279,6 +277,7 @@ class GraphiQLInternals extends React.Component<
     const footer = find(children, child =>
       isChildComponentType(child, GraphiQLFooter),
     );
+    const DocExplorerGraphiQL = docExplorerPlugin.sidebarTabs[0].component;
 
     // const queryWrapStyle = {
     //   WebkitFlex: this.state.editorFlex,
