@@ -15,7 +15,7 @@ import { ToolbarButton } from './ToolbarButton';
 import { QueryEditor } from './QueryEditor';
 import { VariableEditor } from './VariableEditor';
 import { ResultViewer } from './ResultViewer';
-import { plugin as DocExplorerPlugin } from '@graphiql-plugins/doc-explorer-classic';
+import { plugin as docExplorerPlugin } from '@graphiql-plugins/doc-explorer-classic';
 import { QueryHistory } from './QueryHistory';
 import StorageAPI, { Storage } from '../utility/StorageAPI';
 import { VariableToType } from '../utility/getQueryFacts';
@@ -33,6 +33,8 @@ import { getFetcher } from '../api/common';
 import { Unsubscribable, Fetcher, ReactNodeLike } from '../types';
 import { Provider, useThemeLayout } from './common/themes/provider';
 import Tabs from './common/Toolbar/Tabs';
+
+const DocExplorerGraphiQL = docExplorerPlugin.sidebarTabs[0].component;
 
 const DEFAULT_DOC_EXPLORER_WIDTH = 350;
 
@@ -414,7 +416,7 @@ class GraphiQLInternals extends React.Component<
                   {
                     key: 'docs',
                     size: 'sidebar' as const,
-                    component: DocExplorerPlugin.sidebarTabs[0].component,
+                    component: <DocExplorerGraphiQL />,
                   },
                 ]
               : []),

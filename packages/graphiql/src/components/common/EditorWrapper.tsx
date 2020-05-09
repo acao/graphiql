@@ -12,13 +12,14 @@ export default function EditorWrapper(
     innerRef: any;
   },
 ) {
+  const { innerRef, sx, ...rest } = props;
   return (
     <div
-      {...props}
-      ref={props.innerRef}
+      {...rest}
+      ref={innerRef}
       sx={{
         height: '100%',
-        ...props.sx,
+        ...sx,
       }}
     />
   );
