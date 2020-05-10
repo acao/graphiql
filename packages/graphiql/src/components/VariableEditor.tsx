@@ -6,7 +6,7 @@
  */
 
 /** @jsx jsx */
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import { GraphQLType } from 'graphql';
 
 import React from 'react';

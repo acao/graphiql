@@ -1,4 +1,4 @@
-import { ThemeProvider } from 'theme-ui';
+import { ThemeProvider } from '@theme-ui/core';
 import { theme, Layout } from './default';
 import React from 'react';
 import { Global } from '@emotion/core';

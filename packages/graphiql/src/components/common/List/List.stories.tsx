@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import List, { ListRow } from './index';
 
 export default { title: 'Lists' };

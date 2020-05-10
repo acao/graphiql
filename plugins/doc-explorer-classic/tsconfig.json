@@ -12,6 +12,11 @@
       "src/*": ["*"]
     }
   },
+  "references": [
+    {
+      "path": "../../packages/graphiql"
+    }
+  ],
   "include": ["src"],
   "exclude": ["**/__tests__/**", "**/*.spec.*"]
 }

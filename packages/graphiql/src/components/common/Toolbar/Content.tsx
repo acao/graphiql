@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import { DetailedHTMLProps } from 'react';
 
 export type ContentProps = DetailedHTMLProps<

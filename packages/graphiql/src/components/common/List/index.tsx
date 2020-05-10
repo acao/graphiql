@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx, SxStyleProp } from 'theme-ui';
+import { jsx, SxStyleProp } from '@theme-ui/core';
 import { PropsWithChildren } from 'react';
 
 export type ListRowPropTypes = PropsWithChildren<{

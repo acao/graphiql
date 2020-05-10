@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import { PropsWithChildren } from 'react';
 
 import Logo from './Logo';

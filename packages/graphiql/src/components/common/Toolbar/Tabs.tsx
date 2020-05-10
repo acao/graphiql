@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import React from 'react';
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import WithDividers from './support/WithDividers';
 import { ReactNodeLike } from '../../../types';
 

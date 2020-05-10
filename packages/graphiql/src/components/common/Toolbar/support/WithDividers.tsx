@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx, SxStyleProp } from 'theme-ui';
+import { jsx, SxStyleProp } from '@theme-ui/core';
 import { Children, DetailedHTMLProps, HTMLAttributes } from 'react';
 
 export type DividerProps = { innerSx: SxStyleProp };

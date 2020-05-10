@@ -2,11 +2,11 @@ _work in progress_
 
 # What's in a theme?
 
-Themes export a `<Layout/>` component and a `theme-ui` theme. Smaller themes can just re-export the default layout component and more ambitious themes can provide their own `<Layout/>` and override how the application is rendered. This allows top level markup/layout customization beyond simple aesthetics.
+Themes export a `<Layout/>` component and a `@theme-ui/core` theme. Smaller themes can just re-export the default layout component and more ambitious themes can provide their own `<Layout/>` and override how the application is rendered. This allows top level markup/layout customization beyond simple aesthetics.
 
-## The theme-ui theme
+## The @theme-ui/core theme
 
-Components that are not the Layout itself rely on the `theme-ui` constants for styling. This is how they can be customized. To make sure this doesn't break, the theme will have some must-have constants yet to be defined.
+Components that are not the Layout itself rely on the `@theme-ui/core` constants for styling. This is how they can be customized. To make sure this doesn't break, the theme will have some must-have constants yet to be defined.
 
 ## The Layout component
 

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 
-import { jsx, SxStyleProp } from 'theme-ui';
+import { jsx, SxStyleProp } from '@theme-ui/core';
 import * as React from 'react';
 
 export default function EditorWrapper(

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import WithDividers from './support/WithDividers';
 import { PropsWithChildren } from 'react';
 import { JustifyContentProperty } from 'csstype';

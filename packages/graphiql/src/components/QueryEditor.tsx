@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { jsx } from 'theme-ui';
+import { jsx } from '@theme-ui/core';
 import { GraphQLType } from 'graphql';
 import type { EditorOptions } from '../types';
 

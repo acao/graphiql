@@ -30,9 +30,6 @@
     },
     {
       "path": "../graphql-languageservice"
-    },
-    {
-      "path": "../../plugins/doc-explorer-classic"
     }
   ]
 }
