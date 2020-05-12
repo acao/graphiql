@@ -121,7 +121,7 @@ const resultConfig = {
     // })
   ],
   resolve: {
-    extensions: ['.mjs', '.js', '.json', '.jsx', '.css', '.ts', '.tsx'],
+    extensions: ['.mjs', '.js', '.json', '.jsx', '.css', '.ts', '.tsx', '.ttf'],
     modules: [rootPath('node_modules'), rootPath('../', '../', 'node_modules')],
   },
 };
