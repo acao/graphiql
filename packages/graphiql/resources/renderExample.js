@@ -100,9 +100,9 @@ function graphQLFetcher(graphQLParams, opts = { headers: {} }) {
     ? '/graphql'
     : 'https://swapi-graphql.netlify.app/.netlify/functions/index';
 
-  let headers = opts.headers;
+  let headers = opts.headers || {};
   // Convert headers to an object.
-  if (typeof headers === 'string') {
+  if (typeof headers === 'string' && headers.length > 2) {
     headers = JSON.parse(opts.headers);
   }
 
